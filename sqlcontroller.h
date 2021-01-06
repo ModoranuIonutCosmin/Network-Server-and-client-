@@ -27,6 +27,7 @@ public:
     SQLController();
     static bool ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values);
     static QVector<Book> GetBooksList(QVector<QString> constraints);
+    static QString GetFilePath(int id_carte);
     static void Initialize();
     static SQLController* instance;
 };

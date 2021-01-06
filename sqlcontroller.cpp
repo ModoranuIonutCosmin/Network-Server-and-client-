@@ -70,6 +70,20 @@ QVector<Book> SQLController::GetBooksList(QVector<QString> constraints)
     return books;
 }
 
+QString SQLController::GetFilePath(int id_carte)
+{
+    if(Initialized == false)
+        Initialize();
+    QString querry = "SELECT name FROM STORAGE WHERE id_carte = " + QString::number(id_carte);
+    QSqlQuery qry(db);
+    qry.exec(querry);
+    if(qry.next())
+    {
+        return qry.value(0).toString();
+    }
+    return " ";
+}
+
 void SQLController::Initialize()
 {
     QString absolutePath = QDir::currentPath() + ("/userdata.sql");

@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <iostream>
 #include <memory>
+#include <fstream>
+#include "transferscontroller.h"
 
 class NetCODE
 {
@@ -27,7 +29,9 @@ public:
     static void ParseMessage(QString, int);
     static bool Login(QString, int);
     static bool Search(QString, int);
+    static bool Download(QString, int);
     static bool addConnection(Connection con);
+    static void removeConnection(int cd);
     static bool updateConnectionData(int cd, QString& email);
     static NetCODE* instanta ;
 public: //private:

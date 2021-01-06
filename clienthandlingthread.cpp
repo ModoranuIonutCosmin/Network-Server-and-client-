@@ -55,7 +55,8 @@ int ClientHandlingThread::HandleClient()
         fflush(stdout);
         close(cd);
         free(buffer);
-        timer->stop();
+        NetCODE::removeConnection(cd);
+//        timer->stop();
         emit finished();
     }
 

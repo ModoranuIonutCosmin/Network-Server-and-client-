@@ -18,7 +18,8 @@ SOURCES += \
     networkserver.cpp \
     serverwindow.cpp \
     sqlcontroller.cpp \
-    stringhelpers.cpp
+    stringhelpers.cpp \
+    transferscontroller.cpp
 
 HEADERS += \
     book.h \
@@ -29,7 +30,8 @@ HEADERS += \
     networkserver.h \
     serverwindow.h \
     sqlcontroller.h \
-    stringhelpers.h
+    stringhelpers.h \
+    transferscontroller.h
 
 FORMS += \
     serverwindow.ui

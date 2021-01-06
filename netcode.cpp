@@ -5,6 +5,7 @@ std::map<QString, std::function<bool(QString, int)>>
                                 {
                                     {QString("@LOGIN"), NetCODE::Login},
                                     {QString("@SEARCH"), NetCODE::Search},
+                                    {QString("@DOWNLOAD"), NetCODE::Download}
                                 };
 QMutex NetCODE::connectionsCS;
 NetCODE* NetCODE::instanta = nullptr;
@@ -60,7 +61,7 @@ bool NetCODE::Search(QString args, int cd)
     QString sendString= "";
     for(auto& book : books)
     {
-        QString atom = book.title+'|'+book.author+'|'+book.genre +'|' +book.ISBN;
+        QString atom = book.title+'|'+book.author+'|'+book.genre +'|' +book.ISBN +'|' +QString::number(book.id_carte) +'|';
         sendString+= atom +'*';
     }
     qDebug()<<sendString<<Qt::endl;
@@ -69,12 +70,53 @@ bool NetCODE::Search(QString args, int cd)
 
 }
 
+bool NetCODE::Download(QString msg, int cd)
+{
+
+    int id_carte=msg.toInt(); //tbc on expansion!
+    QString fileName ="storage/" + SQLController::GetFilePath(id_carte);
+
+    std::ifstream f(fileName.toStdString(), std::ios::in|std::ios::binary);
+
+    int download_size = TransfersController::GetFileSize(fileName);
+    char* fileContent;
+    try
+    {
+        fileContent = new char[download_size];
+    }
+     catch (std::bad_alloc& re)
+    {
+        std::cout<<re.what()<<std::endl;
+    }
+    f.read(fileContent, download_size);
+
+    write(cd, &download_size, sizeof(download_size));
+    write(cd, fileContent, download_size*sizeof(unsigned char)); //needs works
+    return 1;
+}
+
 bool NetCODE::addConnection(Connection con)
 {
     QMutexLocker mtx(&connectionsCS);
         connections->append(con);
         mtx.unlock();
-    return 1;
+        return 1;
+}
+
+void NetCODE::removeConnection(int cd)
+{
+    NetCODE::connectionsCS.lock();
+    for(auto i=0;  i< (*connections).size(); i++)
+    {
+        if((*connections)[i].cd == cd)
+        {
+
+           (*connections).remove(i);
+           qDebug()<<"\nSterg conn cu cd = "<<cd;
+           fflush(stdout);
+        }
+    }
+    NetCODE::connectionsCS.unlock();
 }
 
 bool NetCODE::updateConnectionData(int cd, QString& email)
@@ -84,7 +126,6 @@ bool NetCODE::updateConnectionData(int cd, QString& email)
     {
         if(conn.cd == cd)
         {
-
             conn.email = email;
             connectionsCS.unlock();
             return 1;

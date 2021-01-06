@@ -34,6 +34,8 @@ int NetworkServer::StartServer()
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons(PORT);
+        int enable = 1;
+
         while (bind(sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in)) < 0)
         {
             std::cout<<"Attempting to bind again!";
@@ -74,7 +76,7 @@ int NetworkServer::ListenCon()
     connection->email="";
     connection->role=-1;
     connection->cd = accept(this->sock, (struct sockaddr *) &(connection->adresaIP), (socklen_t *) &(connection->length));
-   if(errno == 22)
+    if(errno == 22)
     {
         std::cout<<"oops";
         fflush(stdout);
@@ -89,11 +91,12 @@ int NetworkServer::ListenCon()
         /* start a new thread but do not wait for it */
         std::cout<<"Avem conexiune noua!!!!!"<<std::endl;
         std::cout<<"Pana acum avem urmatoarele conexiuni"<<std::endl;
+        NetCODE::connectionsCS.lock();
         for(auto& conn : *(NetCODE::connections))
         {
             std::cout<<conn.email.toStdString()<<std::endl;
         }
-
+        NetCODE::connectionsCS.unlock();
         Connection t = *connection;
         NetCODE::addConnection(t);
         fflush(stdout);
