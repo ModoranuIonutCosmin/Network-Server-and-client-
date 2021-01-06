@@ -61,9 +61,11 @@ searchResultsItem::searchResultsItem(QWidget *parent) : QWidget(parent)
     mapper->toFirst();
 
 }
-void searchResultsItem::Setup(QString name, QString rating, QString views)
+void searchResultsItem::Setup(QString name, QString autor, QString gen, QString ISBN, int id)
 {
     this->vm->setItem(0, 0, new QStandardItem(name));
-    this->vm->setItem(0, 1, new QStandardItem(rating));
-    this->vm->setItem(0, 2, new QStandardItem(views));
+    this->vm->setItem(0, 1, new QStandardItem(autor));
+    this->vm->setItem(0, 2, new QStandardItem(gen));
+    this->vm->setItem(0, 3, new QStandardItem(ISBN));
+    id_carte = id;
 }

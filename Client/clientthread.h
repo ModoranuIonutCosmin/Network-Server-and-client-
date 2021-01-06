@@ -12,6 +12,8 @@
 #include <chrono>
 #include "book.h"
 #include "parseinputoutput.h"
+
+#define MAX_BYTES_DOWNLOAD 10000000
 class ClientThread : public QObject
 {
     Q_OBJECT

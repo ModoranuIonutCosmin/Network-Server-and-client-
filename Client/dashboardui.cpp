@@ -1,9 +1,7 @@
 #include "dashboardui.h"
-
+int DashboardUI::ultima_carte = 0;
 DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
 {
-
-
 
     mainLayout = new QVBoxLayout(this);
     sideMenu = new QVBoxLayout();
@@ -62,6 +60,7 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
 
     connect(this->searchButton, SIGNAL(clicked()), this, SLOT(ChangeContent()));
     connect(this->goBack, SIGNAL(clicked()), this, SLOT(DeleteAllItems()));
+    connect(searchResults, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(GetClickedBook(QListWidgetItem*)));
 
 }
 
@@ -96,12 +95,27 @@ void DashboardUI::AppendBooks(QVector<Book> books)
         searchResults->addItem(h);
         records.append(v);
         items.append(h);
-
         searchResults->setItemWidget(h, v);
-        records.back()->Setup(book.title, book.author, book.ISBN);
+        records.back()->Setup(book.title, book.author, book.genre, book.ISBN, book.id_carte);
+
+        fflush(stdout);
     }
 
     fflush(stdout);
+}
+
+void DashboardUI::GetClickedBook(QListWidgetItem* item)
+{
+    for(auto i=0; i<items.length(); i++)
+    {
+        if(items[i] == item)
+        {
+            std::cout<<"GAsesc un id = "<<records[i]->id_carte<<std::endl;
+            fflush(stdout);
+            emit DoBookPage(records[i]->id_carte);
+            break;
+        }
+    }
 }
 
 void DashboardUI::DeleteAllItems()

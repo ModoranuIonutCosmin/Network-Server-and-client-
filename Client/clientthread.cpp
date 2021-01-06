@@ -69,6 +69,8 @@ void ClientThread::DoCleanup()
         case AQUIRE_JOB:
              emit sendBooks(ParseInputOutput::result);
         break;
+    default:
+        break;
     }
 }
 
@@ -83,7 +85,17 @@ int ClientThread::HandleClient()
                                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                                 return 0;
                                }
+    if (write (sock, (ClientThread::pendingMessage)->toStdString().c_str(), 1000) < 0) \
+        //changed sign
+    {
+        perror ("[client]Eroare la write() spre server.\n");
+        close(sock);
+        emit finished();
+        return errno;
+    }
 
+    /* citirea raspunsului dat de server
+           (apel blocant pina cind serverul raspunde) */
     ParseInputOutput::Parse(pendingMessage, sock); //parseaza si foloseste inputul primit
 
     DoCleanup();

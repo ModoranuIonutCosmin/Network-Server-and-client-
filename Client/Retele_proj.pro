@@ -10,6 +10,7 @@ CONFIG += c++14
 
 SOURCES += \
     book.cpp \
+    bookinspect.cpp \
     clientthread.cpp \
     dashboardui.cpp \
     loginform.cpp \
@@ -17,17 +18,20 @@ SOURCES += \
     clientwindow.cpp \
     parseinputoutput.cpp \
     searchresultsitem.cpp \
-    spoiler.cpp
+    spoiler.cpp \
+    transfer.cpp
 
 HEADERS += \
     book.h \
+    bookinspect.h \
     clientthread.h \
     clientwindow.h \
     dashboardui.h \
     loginform.h \
     parseinputoutput.h \
     searchresultsitem.h \
-    spoiler.h
+    spoiler.h \
+    transfer.h
 
 FORMS += \
     clientwindow.ui \

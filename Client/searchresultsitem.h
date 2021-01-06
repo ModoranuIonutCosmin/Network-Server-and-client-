@@ -16,7 +16,7 @@ class searchResultsItem : public QWidget
     Q_OBJECT
 public:
     explicit searchResultsItem(QWidget *parent = nullptr);
-    void Setup(QString name, QString rating, QString views);
+    void Setup(QString name, QString autor, QString gen, QString ISBN, int id_carte);
 signals:
 //    void dataChanged(QModelIndex,QModelIndex,QVector<int>);
 public:
@@ -32,7 +32,7 @@ public:
     QImage image;
     QStandardItemModel* vm;
     QDataWidgetMapper* mapper;
-
+    int id_carte = 999;
 };
 
 #endif // SEARCHRESULTSITEM_H

@@ -8,6 +8,7 @@
 #include <QStackedWidget>
 #include "dashboardui.h"
 #include <memory>
+#include "bookinspect.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClientWindow; }
@@ -24,9 +25,13 @@ public:
 private slots:
     void goNextPage();
     void userLoggedIn();
+    void doPage(int);
 private:
     Ui::ClientWindow *ui;
     QStackedWidget* pageHolder = nullptr;
+    LoginForm* lf = nullptr;
+    DashboardUI* du = nullptr;
+    BookInspect* v = nullptr ;
     int currentPage = 0;
 };
 #endif // CLIENTWINDOW_H

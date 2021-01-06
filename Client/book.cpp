@@ -17,7 +17,7 @@ QVector<Book> Book::ParseBookString(QString mesaj)
     {
         QRegExp rx1("(\\|)");
         QVector<QString> stats =  str.split(rx1).toVector();
-        Book carte(stats[0], stats[1], stats[2], stats[3]);
+        Book carte(stats[0], stats[1], stats[2], stats[3], stats[4].toInt());
         ret.append(carte);
     }
     return ret;

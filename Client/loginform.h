@@ -27,9 +27,9 @@ private slots:
 public:
     QStandardItemModel* vm=nullptr;
     QDataWidgetMapper *mapper = nullptr;
-    QPushButton* loginButton;
     QLineEdit* userField;
     QLineEdit* passwordField;
+    QPushButton* loginButton;
     QVBoxLayout* mainLayout;
     QHBoxLayout* userLineAndField;
     QHBoxLayout* passwordLineAndField;

@@ -22,20 +22,24 @@ ClientWindow::ClientWindow(QWidget *parent)
     Thread->start();
 
 
-    LoginForm* lf = new LoginForm(this);
-    DashboardUI* du = new DashboardUI(this);
+    lf  = new LoginForm(this);
+    du = new DashboardUI(this);
+
 //    searchResultsItem* it = new searchResultsItem(this);
 
     pageHolder= new QStackedWidget(this);
 
      pageHolder->addWidget(lf);
     pageHolder->addWidget(du);
+//    pageHolder->addWidget(v);
 //    pageHolder->addWidget(new QPushButton("hello"));
 
     this->ui->verticalLayout_2->addWidget(pageHolder);
     connect(lf->loginButton, SIGNAL(clicked()),lf, SLOT(AttemptLogin()));
+    connect(du, SIGNAL(DoBookPage(int)), this, SLOT(doPage(int)));
     connect(worker, SIGNAL(loginFailed()), lf, SLOT(ShowHint()));
     connect(worker, SIGNAL(sendBooks(QVector<Book>)), du, SLOT(AppendBooks(QVector<Book>)));
+
 }
 
 ClientWindow::~ClientWindow()
@@ -51,5 +55,16 @@ void ClientWindow::goNextPage()
 void ClientWindow::userLoggedIn()
 {
     pageHolder->setCurrentIndex(1);
+}
+
+void ClientWindow::doPage(int id)
+{
+    if(v!=nullptr)
+    {
+        delete v;
+    }
+    v = new BookInspect(id);
+    this->pageHolder->addWidget(v);
+    this->pageHolder->setCurrentIndex(2);
 }
 

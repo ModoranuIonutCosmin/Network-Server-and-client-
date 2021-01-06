@@ -47,10 +47,13 @@ public:
     QPushButton* goBack;
     QList<searchResultsItem*> records;
     QList<QListWidgetItem*> items;
+    static int ultima_carte;
 signals:
+   void DoBookPage(int id_carte);
 private slots:
    void ChangeContent();
    void AppendBooks(QVector<Book> books);
+   void GetClickedBook(QListWidgetItem* item);
    void DeleteAllItems();
 
 };

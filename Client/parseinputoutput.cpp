@@ -10,18 +10,13 @@ std::map<QString, std::function<bool(QString, int)>>
                                 {
                                     {QString("@LOGIN"), ParseInputOutput::Login},
                                     {QString("@SEARCH"), ParseInputOutput::GetResults},
+                                    {QString("@DOWNLOAD"), ParseInputOutput::DownloadFile}
         };
 bool ParseInputOutput::GetResults(QString msg, int sd)
 {
     char msgc[1000];
     lastJob = AQUIRE_JOB;
-    if (write (sd, (ClientThread::pendingMessage)->toStdString().c_str(), 1000) <= 0)
-    {
-        perror ("[client]Eroare la write() spre server.\n");
-        return errno;
-    }
-    /* citirea raspunsului dat de server
-           (apel blocant pina cind serverul raspunde) */
+
     if (read (sd, msgc, 1000) < 0)
     {
         perror ("[client]Eroare la read() de la server.\n");
@@ -40,13 +35,7 @@ bool ParseInputOutput::Login(QString msg, int sd)
 {
     char msgc[1000];
     lastJob = LOGIN_JOB;
-    if (write (sd, (ClientThread::pendingMessage)->toStdString().c_str(), 1000) <= 0)
-    {
-        perror ("[client]Eroare la write() spre server.\n");
-        return errno;
-    }
-    /* citirea raspunsului dat de server
-           (apel blocant pina cind serverul raspunde) */
+
     if (read (sd, msgc, 1000) < 0)
     {
         perror ("[client]Eroare la read() de la server.\n");
@@ -85,5 +74,39 @@ bool ParseInputOutput::Parse(std::unique_ptr<QString>& pendingMsg, int sd)
     }
     *pendingMsg = " ";
     qDebug()<<"OOPS";
+    return 1;
+}
+
+bool ParseInputOutput::DownloadFile(QString msg, int sd)
+{
+    int downloadSize = 0;
+
+    if (read (sd, &downloadSize, sizeof(int)) < 0)
+    {
+        perror ("[client]Eroare la read() de la server.\n");
+        return errno;
+    }
+    char* fileBuffer;
+    try
+    {
+        fileBuffer = new  char[downloadSize+1];
+    }
+
+    catch(std::bad_alloc& be)
+    {
+        qDebug()<<be.what()<<Qt::endl;
+        //n-are memorie, mai incearca sau forteaza un crash cu mesaj
+    }
+    int received = 0;
+    if ((received = read (sd, fileBuffer, sizeof(unsigned char)*downloadSize)) < 0)
+    {
+        perror ("[client]Eroare la read() de la server.\n");
+        return errno;
+    }
+
+    Transfer::PlaceFile(fileBuffer, downloadSize);
+
+
+    delete[] fileBuffer;
     return 1;
 }
