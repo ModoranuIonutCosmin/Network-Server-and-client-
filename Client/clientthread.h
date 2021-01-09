@@ -19,7 +19,7 @@ class ClientThread : public QObject
     Q_OBJECT
 public:
     static std::mutex messageProtect;
-
+    static std::unique_ptr<QString> userEmail; // needs protecting
     explicit ClientThread(QObject *parent = nullptr);
     int InitializeClient();
     void DoCleanup();
@@ -29,6 +29,7 @@ signals:
     void loginSuccesful();
     void loginFailed();
     void sendBooks(QVector<Book>); // To ui!
+    void createBooks(QVector<Book>); // To ui!
 private slots:
     int HandleClient();
 private:

@@ -15,13 +15,13 @@
 #include <string.h>
 #include <QApplication>
 #include "book.h"
+#include <QDesktopWidget>
+#include <QScreen>
+///* codul de eroare returnat de anumite apeluri */
+//extern int errno;
 
-
-/* codul de eroare returnat de anumite apeluri */
-extern int errno;
-
-/* portul de conectare la server*/
-int port;
+///* portul de conectare la server*/
+//int port;
 
 
 
@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     ClientWindow w;
+    w.setWindowTitle("ReadsProfiler client application");
+    w.resize(1000, 750);
     w.show();
     a.exec();
 

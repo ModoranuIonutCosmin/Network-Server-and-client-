@@ -9,6 +9,7 @@
 class Book
 {
 public:
+    Book();
     Book(QString title, QString author, QString genre, QString ISBN, int id_carte=UNDEFINED_BOOK);
     QString title;
     QString author;

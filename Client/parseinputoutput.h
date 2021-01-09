@@ -17,9 +17,11 @@
 #include <QtDebug>
 #include "clientthread.h"
 #include "transfer.h"
+
 #define AQUIRE_JOB 1001
 #define LOGIN_JOB 1002
 #define DOWNLOAD_JOB 1003
+#define UPLOAD_JOB 1004
 
 class ParseInputOutput
 {
@@ -35,6 +37,7 @@ public:
     ParseInputOutput();
     static bool Parse (std::unique_ptr<QString>& pendingMsg, int sd);
     static bool DownloadFile(QString msg, int sd);
+    static bool UploadFile(QString msg, int sd);
 };
 
 #endif // PARSEINPUTOUTPUT_H

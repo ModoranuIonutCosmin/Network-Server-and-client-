@@ -63,9 +63,23 @@ searchResultsItem::searchResultsItem(QWidget *parent) : QWidget(parent)
 }
 void searchResultsItem::Setup(QString name, QString autor, QString gen, QString ISBN, int id)
 {
+    // an
+    fullyInitialized = 1;
     this->vm->setItem(0, 0, new QStandardItem(name));
     this->vm->setItem(0, 1, new QStandardItem(autor));
     this->vm->setItem(0, 2, new QStandardItem(gen));
     this->vm->setItem(0, 3, new QStandardItem(ISBN));
     id_carte = id;
+}
+
+Book searchResultsItem::Get() const
+{
+    Book b;
+    if(fullyInitialized ==0) return b;
+    b.title = this->vm->item(0, 0)->text();
+    b.author= this->vm->item(0, 1)->text();
+    b.genre = this->vm->item(0, 2)->text();
+    b.ISBN= this->vm->item(0, 3)->text();
+    b.id_carte = this->id_carte;
+    return b;
 }

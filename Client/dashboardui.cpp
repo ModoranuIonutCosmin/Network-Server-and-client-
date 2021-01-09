@@ -13,6 +13,7 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
     menu= new QMenuBar();
     settings = new QMenu("text");
 
+
     searchField = new QLineEdit(this);
     author = new QLineEdit(this);
     ISBN = new QLineEdit(this);
@@ -24,7 +25,9 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
     ISBNLabel = new QLabel("ISBN:", this);
 
     searchButton = new QPushButton("Search", this);
+    goToRecomandations = new QPushButton("Recommandations");
     goBack = new QPushButton("GO back", this);
+    publish = new QPushButton("Publish", this);
     searchResults = new QListWidget(this);
 
 
@@ -39,7 +42,13 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
     filters->addWidget(gen);
 
 
+    sideMenu->addStretch(1);
     sideMenu->addWidget(goBack);
+    sideMenu->addWidget(goToRecomandations);
+    sideMenu->addWidget(publish);
+    sideMenu->addStretch(1);
+    sideMenu->setAlignment(goBack, Qt::AlignVCenter);
+    sideMenu->setAlignment(goToRecomandations, Qt::AlignVCenter);
 
 
     menu->addMenu(settings);
@@ -59,9 +68,11 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
 
 
     connect(this->searchButton, SIGNAL(clicked()), this, SLOT(ChangeContent()));
-    connect(this->goBack, SIGNAL(clicked()), this, SLOT(DeleteAllItems()));
-    connect(searchResults, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(GetClickedBook(QListWidgetItem*)));
 
+    connect(this->goToRecomandations, SIGNAL(clicked()), this, SLOT(ShowRecommandations()) );
+    connect(searchResults, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(GetClickedBook(QListWidgetItem*)));
+    connect(&tryAgain, SIGNAL(timeout()), this, SLOT(CheckSpam()));
+    tryAgain.start(TIME);
 }
 
 void DashboardUI::ChangeContent()
@@ -87,6 +98,12 @@ void DashboardUI::AppendBooks(QVector<Book> books)
 {
     qDebug()<<"Appendam carti!!!"<<Qt::endl;
     //sters initiale?
+    if(this->NoClicks >= MAX_CLICKS_PER_TIME)
+    {
+        this->searchButton->setEnabled(false);
+        return;
+    }
+    NoClicks++;
     for(auto& book: books)
     {
         auto v = new searchResultsItem();
@@ -112,10 +129,15 @@ void DashboardUI::GetClickedBook(QListWidgetItem* item)
         {
             std::cout<<"GAsesc un id = "<<records[i]->id_carte<<std::endl;
             fflush(stdout);
-            emit DoBookPage(records[i]->id_carte);
+            emit DoBookPage(records[i]->Get());
             break;
         }
     }
+}
+
+void DashboardUI::ShowRecommandations()
+{
+    emit DoRecommandationsPage();
 }
 
 void DashboardUI::DeleteAllItems()
@@ -133,4 +155,10 @@ void DashboardUI::DeleteAllItems()
     }
     records.clear();
     items.clear();
+}
+
+void DashboardUI::CheckSpam()
+{
+   this->NoClicks = 0;
+   this->searchButton->setEnabled(true);
 }

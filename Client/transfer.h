@@ -13,7 +13,9 @@ public:
     Transfer();
     static QMutex transferProtect;
     static std::unique_ptr<QString> browsePath;
-    static void PlaceFile(const char*, int);
+    static void PlaceFile(const unsigned char*, int);
+    static int GetFileSize(QString);
+    static std::unique_ptr<QString> uploadFilePath;
 };
 
 #endif // TRANSFER_H

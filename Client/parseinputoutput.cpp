@@ -10,7 +10,8 @@ std::map<QString, std::function<bool(QString, int)>>
                                 {
                                     {QString("@LOGIN"), ParseInputOutput::Login},
                                     {QString("@SEARCH"), ParseInputOutput::GetResults},
-                                    {QString("@DOWNLOAD"), ParseInputOutput::DownloadFile}
+                                    {QString("@DOWNLOAD"), ParseInputOutput::DownloadFile},
+                                    {QString("@UPLOAD"), ParseInputOutput::UploadFile}
         };
 bool ParseInputOutput::GetResults(QString msg, int sd)
 {
@@ -44,6 +45,8 @@ bool ParseInputOutput::Login(QString msg, int sd)
     if(strstr(msgc, "Authorized") == msgc)
     {
         LoginResult = true;
+        auto tmp = *(ClientThread::userEmail) = msg.split(QRegExp("(\\ )")).toVector()[0];
+
     }
     /* afisam mesajul primit */
     std::cout<<"[client]Mesajul primit este:"<< msgc<<std::endl;
@@ -80,16 +83,17 @@ bool ParseInputOutput::Parse(std::unique_ptr<QString>& pendingMsg, int sd)
 bool ParseInputOutput::DownloadFile(QString msg, int sd)
 {
     int downloadSize = 0;
-
+    int totalSize=0;
+    lastJob = DOWNLOAD_JOB;
     if (read (sd, &downloadSize, sizeof(int)) < 0)
     {
         perror ("[client]Eroare la read() de la server.\n");
         return errno;
     }
-    char* fileBuffer;
+    unsigned char* fileBuffer;
     try
     {
-        fileBuffer = new  char[downloadSize+1];
+        fileBuffer = new  unsigned char[downloadSize+1];
     }
 
     catch(std::bad_alloc& be)
@@ -98,15 +102,63 @@ bool ParseInputOutput::DownloadFile(QString msg, int sd)
         //n-are memorie, mai incearca sau forteaza un crash cu mesaj
     }
     int received = 0;
-    if ((received = read (sd, fileBuffer, sizeof(unsigned char)*downloadSize)) < 0)
+    totalSize = downloadSize;
+    int index = 0;
+    while(downloadSize>0)
     {
-        perror ("[client]Eroare la read() de la server.\n");
-        return errno;
+        if(downloadSize <= 1499)
+        {
+            int a=5;
+        }
+        unsigned char pachet[1501];
+
+        if ((received = read (sd, pachet, sizeof(unsigned char)*std::min(downloadSize, 1499))) < 0)
+        {
+                perror ("[client]Eroare la read() de la server.\n");
+                return errno;
+        }
+
+        downloadSize-= received;
+        memcpy(fileBuffer+index,pachet, received*sizeof(unsigned char));
+        index+= received;
     }
 
-    Transfer::PlaceFile(fileBuffer, downloadSize);
+    Transfer::PlaceFile(fileBuffer, totalSize);
 
 
     delete[] fileBuffer;
+    return 1;
+}
+
+bool ParseInputOutput::UploadFile(QString msg, int sd)
+{
+    QString path = *(Transfer::uploadFilePath);
+    std::ifstream f(path.toStdString(), std::ios::in|std::ios::binary);
+    lastJob = UPLOAD_JOB;
+    int upload_size = Transfer::GetFileSize(path);
+    unsigned char* fileContent;
+    try
+    {
+        fileContent = new unsigned char[upload_size+1];
+    }
+     catch (std::bad_alloc& be)
+    {
+        std::cout<<be.what()<<std::endl;
+    }
+    f.read((char*)fileContent, upload_size);
+    write(sd, &upload_size, sizeof(upload_size));
+    int index = 0;
+    while(upload_size>0)
+    {
+       int received = write(sd, fileContent + index, (std::min(upload_size, 1499))*sizeof(unsigned char)); //needs work
+
+       upload_size-=received;
+       if(upload_size<= 1499)
+       {
+           int a= 10;
+       }
+       index += received;
+    }
+    delete[] fileContent;
     return 1;
 }

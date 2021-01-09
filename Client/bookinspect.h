@@ -8,16 +8,21 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListWidget>
+#include <QLabel>
 #include "transfer.h"
 #include "clientthread.h"
 class BookInspect : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BookInspect(int id_carte, QWidget *parent = nullptr);
-    void Setuip(int id);
+    explicit BookInspect(Book b, QWidget *parent = nullptr);
+    void Setuip(int id, QString nume);
     QPushButton* loginButton;
+    QPushButton* goBack;
     QVBoxLayout* mainLayout;
+    QLabel* name;
+    QLabel* rating;
+    Book date;
     int id_carte = 0;
 signals:
 private slots:

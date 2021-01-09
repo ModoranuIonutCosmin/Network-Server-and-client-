@@ -14,6 +14,7 @@
 
 std::unique_ptr<QString> ClientThread::pendingMessage = std::make_unique<QString>(" ");
 std::mutex ClientThread::messageProtect;
+std::unique_ptr<QString> ClientThread::userEmail = std::make_unique<QString>("");
 ClientThread::ClientThread(QObject *parent) : QObject(parent)
 {
     if(InitializeClient()<0) return;

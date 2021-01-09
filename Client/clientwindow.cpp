@@ -24,21 +24,31 @@ ClientWindow::ClientWindow(QWidget *parent)
 
     lf  = new LoginForm(this);
     du = new DashboardUI(this);
-
+    rs = new Recommandations(this);
+    pb = new PublishPage(this);
 //    searchResultsItem* it = new searchResultsItem(this);
 
     pageHolder= new QStackedWidget(this);
 
-     pageHolder->addWidget(lf);
+    pageHolder->addWidget(lf);
     pageHolder->addWidget(du);
+    pageHolder->addWidget(rs);
+    pageHolder->addWidget(pb);
 //    pageHolder->addWidget(v);
 //    pageHolder->addWidget(new QPushButton("hello"));
 
     this->ui->verticalLayout_2->addWidget(pageHolder);
     connect(lf->loginButton, SIGNAL(clicked()),lf, SLOT(AttemptLogin()));
-    connect(du, SIGNAL(DoBookPage(int)), this, SLOT(doPage(int)));
+    connect(du->goBack, SIGNAL(clicked()), this, SLOT(GoToLogin()));
+    connect(rs->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboardAndCleanUpRecommandations()));
+    connect(pb->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboard()));
+
+    connect(du, SIGNAL(DoBookPage(Book)), this, SLOT(doPage(Book)));
+    connect(du, SIGNAL(DoRecommandationsPage()), this, SLOT(ShowRecommandations()));
+    connect(du->publish, SIGNAL(clicked()), this, SLOT(GoToPublishPage()));
     connect(worker, SIGNAL(loginFailed()), lf, SLOT(ShowHint()));
     connect(worker, SIGNAL(sendBooks(QVector<Book>)), du, SLOT(AppendBooks(QVector<Book>)));
+    connect(worker, SIGNAL(createBooks(QVector<Book>)), rs, SLOT(DoBooksList(QVector<Book>)));
 
 }
 
@@ -57,14 +67,49 @@ void ClientWindow::userLoggedIn()
     pageHolder->setCurrentIndex(1);
 }
 
-void ClientWindow::doPage(int id)
+void ClientWindow::doPage(Book b)
 {
+    v = new BookInspect(b);
+    this->pageHolder->addWidget(v);
+    this->pageHolder->setCurrentWidget(v);
+    connect(v->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboardAndCleanUpBookInspect()));
+}
+
+void ClientWindow::ShowRecommandations()
+{
+    this->pageHolder->setCurrentIndex(2);
+}
+
+void ClientWindow::GoToLogin()
+{
+    this->pageHolder->setCurrentWidget(lf);
+}
+
+void ClientWindow::GoToDashboardAndCleanUpRecommandations()
+{
+    this->pageHolder->setCurrentWidget(du);
+
+}
+
+void ClientWindow::GoToDashboardAndCleanUpBookInspect()
+{
+    this->pageHolder->setCurrentWidget(du);
     if(v!=nullptr)
     {
-        delete v;
+          this->pageHolder->removeWidget(v);
+          delete v; //periculos, deleteLater() !
     }
-    v = new BookInspect(id);
-    this->pageHolder->addWidget(v);
-    this->pageHolder->setCurrentIndex(2);
+
+}
+
+void ClientWindow::GoToPublishPage()
+{
+     pb->UserNameUpdated();
+     this->pageHolder->setCurrentWidget(pb);
+}
+
+void ClientWindow::GoToDashboard()
+{
+    this->pageHolder->setCurrentWidget(du);
 }
 

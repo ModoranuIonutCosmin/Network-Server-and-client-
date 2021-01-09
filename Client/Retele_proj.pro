@@ -17,6 +17,8 @@ SOURCES += \
     main.cpp \
     clientwindow.cpp \
     parseinputoutput.cpp \
+    publishpage.cpp \
+    recommandations.cpp \
     searchresultsitem.cpp \
     spoiler.cpp \
     transfer.cpp
@@ -29,6 +31,8 @@ HEADERS += \
     dashboardui.h \
     loginform.h \
     parseinputoutput.h \
+    publishpage.h \
+    recommandations.h \
     searchresultsitem.h \
     spoiler.h \
     transfer.h

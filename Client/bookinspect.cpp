@@ -1,16 +1,23 @@
 #include "bookinspect.h"
 
-BookInspect::BookInspect(int id, QWidget *parent) :QWidget(parent), id_carte(id)
+BookInspect::BookInspect(Book b, QWidget *parent) :QWidget(parent)
 {
-    loginButton = new QPushButton(QString::number(id_carte), parent);
+    loginButton = new QPushButton(QString::number(b.id_carte), parent);
+    name = new QLabel(" ");
+    goBack = new QPushButton("Go back");
     mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(name);
     mainLayout->addWidget(loginButton);
+    mainLayout->addWidget(goBack);
+    date = b;
+    this->name->setText(b.title);
     connect(loginButton, SIGNAL(clicked()), this, SLOT(Download()));
 }
 
-void BookInspect::Setuip(int id)
+void BookInspect::Setuip(int id, QString name)
 {
     loginButton->setText(QString::number(id));
+    this->name->setText(name);
 }
 
 void BookInspect::Download()
