@@ -8,7 +8,7 @@ SQLController::SQLController()
 
 }
 
-bool SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values)
+int SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values)
 {
     if(Initialized == false)
         Initialize();
@@ -28,9 +28,9 @@ bool SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<
    if(qry.next())
    {
        qDebug()<<"Successful login";
-       return 1;
+       return qry.value(4).toInt();
    }
-   return 0;
+   return -1;
 }
 
 QVector<Book> SQLController::GetBooksList(QVector<QString> constraints)
@@ -83,6 +83,27 @@ QString SQLController::GetFilePath(int id_carte)
     }
     return " ";
 }
+
+int SQLController::RegisterBook(Book &b)
+{
+    int newID = -1;
+    QString querry = QString("INSERT INTO BOOKS (Titlu, Autor, Gen, ISBN, An) ")+
+                     +"VALUES ('" + b.title +"','" +b.author+"','"+ b.genre+"','" + b.ISBN +"',"+
+                     b.an+")";
+    QSqlQuery qry(db);
+    qry.exec(querry);
+    qry.exec("SELECT id_carte FROM BOOKS WHERE id_carte = (SELECT MAX(id_carte)  FROM BOOKS)");
+    if(qry.next() < 0)
+    {
+        qDebug()<<"Eroare la MAX() in register book"<<Qt::endl;
+    }
+    newID = qry.value(0).toInt();
+    qry.exec("insert into STORAGE VALUES ("+QString::number(newID)+",'"+b.title.replace(" ","_")+ QString::number(newID)+".pdf')");
+
+    return newID;
+}
+
+
 
 void SQLController::Initialize()
 {

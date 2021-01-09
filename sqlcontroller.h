@@ -19,15 +19,17 @@ public:
         USERS,
         ACTIVTY,
         BOOKS,
-        STORAGE
+        STORAGE,
+        RATINGS
     };
     static bool Initialized;
     static QSqlDatabase db;
     Q_ENUM(DBTabs)
     SQLController();
-    static bool ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values);
+    static int ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values);
     static QVector<Book> GetBooksList(QVector<QString> constraints);
     static QString GetFilePath(int id_carte);
+    static int RegisterBook(Book& b);
     static void Initialize();
     static SQLController* instance;
 };

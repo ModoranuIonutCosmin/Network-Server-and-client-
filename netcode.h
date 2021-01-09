@@ -30,9 +30,10 @@ public:
     static bool Login(QString, int);
     static bool Search(QString, int);
     static bool Download(QString, int);
+    static bool Upload(QString, int);
     static bool addConnection(Connection con);
     static void removeConnection(int cd);
-    static bool updateConnectionData(int cd, QString& email);
+    static bool updateConnectionData(int cd, QString& email, int id);
     static NetCODE* instanta ;
 public: //private:
      static std::unique_ptr<QVector<Connection>> connections;

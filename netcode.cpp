@@ -5,7 +5,8 @@ std::map<QString, std::function<bool(QString, int)>>
                                 {
                                     {QString("@LOGIN"), NetCODE::Login},
                                     {QString("@SEARCH"), NetCODE::Search},
-                                    {QString("@DOWNLOAD"), NetCODE::Download}
+                                    {QString("@DOWNLOAD"), NetCODE::Download},
+                                    {QString("@UPLOAD"), NetCODE::Upload}
                                 };
 QMutex NetCODE::connectionsCS;
 NetCODE* NetCODE::instanta = nullptr;
@@ -38,11 +39,11 @@ bool NetCODE::Login(QString args, int clientSD)
     qDebug()<<"attempting to login"<<clientSD;
     QVector<QString> fields {"email", "authHash"};
     QVector<QString> values = StringHelpers::Tokenize(args);
-
-    if(SQLController::ExistsRecord(SQLController::DBTabs::USERS, fields, values))
+    int userID = -1;
+    if((userID = SQLController::ExistsRecord(SQLController::DBTabs::USERS, fields, values))>=0)
     {
         qDebug()<<"Access granted for client with cd="<<clientSD;
-        updateConnectionData(clientSD, values[0]);
+        updateConnectionData(clientSD, values[0], userID);
         write(clientSD, "Authorized", 1000);
         return 1;
     }
@@ -58,12 +59,7 @@ bool NetCODE::Search(QString args, int cd)
     QRegExp rx("(\\|)");
     QStringList fields = args.split(rx);
     auto books = SQLController::GetBooksList(fields.toVector());
-    QString sendString= "";
-    for(auto& book : books)
-    {
-        QString atom = book.title+'|'+book.author+'|'+book.genre +'|' +book.ISBN +'|' +QString::number(book.id_carte) +'|';
-        sendString+= atom +'*';
-    }
+    QString sendString= Book::DoListAsMessage(books);
     qDebug()<<sendString<<Qt::endl;
     write(cd, sendString.toStdString().c_str(), 1000);
     return 1;
@@ -79,19 +75,85 @@ bool NetCODE::Download(QString msg, int cd)
     std::ifstream f(fileName.toStdString(), std::ios::in|std::ios::binary);
 
     int download_size = TransfersController::GetFileSize(fileName);
-    char* fileContent;
+    unsigned char* fileContent;
     try
     {
-        fileContent = new char[download_size];
+        fileContent = new unsigned char[download_size + 1];
     }
-     catch (std::bad_alloc& re)
+    catch (std::bad_alloc& be)
     {
-        std::cout<<re.what()<<std::endl;
+        std::cout<<be.what()<<std::endl;
     }
-    f.read(fileContent, download_size);
+    f.read((char*)fileContent, download_size);
 
     write(cd, &download_size, sizeof(download_size));
-    write(cd, fileContent, download_size*sizeof(unsigned char)); //needs works
+    int index = 0;
+    while(download_size>0)
+    {
+        int received = write(cd, fileContent + index, (std::min(download_size, 1499))*sizeof(char)); //needs work
+
+        download_size-=received;
+        if(download_size<= 1499)
+        {
+            int a= 10;
+        }
+        index += received;
+    }
+
+    delete[] fileContent;
+    return 1;
+}
+
+bool NetCODE::Upload(QString args, int cd)
+{
+    int uploadSize = 0;
+    Book b = Book::DoMessageAsBook(args.split(QRegExp("(\\ )")).toVector()[0]);
+
+
+    if (read (cd, &uploadSize, sizeof(int)) < 0)
+    {
+        perror ("[client]Eroare la read() de la server.\n");
+        return errno;
+    }
+    unsigned char* fileBuffer;
+    try
+    {
+        fileBuffer = new  unsigned char[uploadSize+1];
+    }
+
+    catch(std::bad_alloc& be)
+    {
+        qDebug()<<be.what()<<Qt::endl;
+        return false;
+        //n-are memorie, mai incearca sau forteaza un crash cu mesaj
+    }
+    int received = 0;
+    int totalSize = uploadSize;
+    int index = 0;
+    while(uploadSize>0)
+    {
+        if(uploadSize <= 1499)
+        {
+            int a=5;
+        }
+        unsigned char pachet[1501];
+
+        if ((received = read (cd, pachet, sizeof(unsigned char)*std::min(uploadSize, 1499))) < 0)
+        {
+                perror ("[client]Eroare la read() de la server.\n");
+                return errno;
+        }
+
+        uploadSize-= received;
+        memcpy(fileBuffer+index,pachet, received*sizeof(unsigned char));
+        index+= received;
+    }
+
+    int newID = SQLController::RegisterBook(b);
+    TransfersController::PlaceFile(fileBuffer, totalSize, "storage/" +b.title.replace(" ","_")+ QString::number(newID)+".pdf");
+
+
+    delete[] fileBuffer;
     return 1;
 }
 
@@ -119,7 +181,7 @@ void NetCODE::removeConnection(int cd)
     NetCODE::connectionsCS.unlock();
 }
 
-bool NetCODE::updateConnectionData(int cd, QString& email)
+bool NetCODE::updateConnectionData(int cd, QString& email, int id)
 {
     connectionsCS.lock();
     for(auto& conn : *instanta->connections)
@@ -127,6 +189,7 @@ bool NetCODE::updateConnectionData(int cd, QString& email)
         if(conn.cd == cd)
         {
             conn.email = email;
+            conn.ID = id;
             connectionsCS.unlock();
             return 1;
         }
