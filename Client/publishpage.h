@@ -60,6 +60,8 @@ signals:
 private slots:
     bool CheckIfValidInputs();
     void BrowseForPath();
+    void replaceSpacesWithSemicolon(QString);
+    void trimSemicolon();
 };
 
 #endif // PUBLISHPAGE_H

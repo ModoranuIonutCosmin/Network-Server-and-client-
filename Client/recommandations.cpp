@@ -67,7 +67,7 @@ void Recommandations::DoBooksList(QVector<Book> books)
         records.append(v);
         items.append(h);
         searchResults->setItemWidget(h, v);
-        records.back()->Setup(book.title, book.author, book.genre, book.ISBN, book.id_carte);
+        records.back()->Setup(book.title, book.author, book.genre, book.ISBN, book.rating, book.an, book.id_carte);
 
         fflush(stdout);
     }

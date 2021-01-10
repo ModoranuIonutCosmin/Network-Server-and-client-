@@ -22,6 +22,7 @@
 #define LOGIN_JOB 1002
 #define DOWNLOAD_JOB 1003
 #define UPLOAD_JOB 1004
+#define RATE_JOB 1005
 
 class ParseInputOutput
 {
@@ -34,6 +35,7 @@ public:
 
     static bool GetResults(QString msg, int sd);
     static bool Login(QString msg, int sd);
+    static bool Rate(QString msg, int sd);
     ParseInputOutput();
     static bool Parse (std::unique_ptr<QString>& pendingMsg, int sd);
     static bool DownloadFile(QString msg, int sd);

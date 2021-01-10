@@ -11,7 +11,8 @@ std::map<QString, std::function<bool(QString, int)>>
                                     {QString("@LOGIN"), ParseInputOutput::Login},
                                     {QString("@SEARCH"), ParseInputOutput::GetResults},
                                     {QString("@DOWNLOAD"), ParseInputOutput::DownloadFile},
-                                    {QString("@UPLOAD"), ParseInputOutput::UploadFile}
+                                    {QString("@UPLOAD"), ParseInputOutput::UploadFile},
+                                    {QString("@RATE"), ParseInputOutput::Rate}
         };
 bool ParseInputOutput::GetResults(QString msg, int sd)
 {
@@ -54,6 +55,32 @@ bool ParseInputOutput::Login(QString msg, int sd)
     return LoginResult;
 }
 
+bool ParseInputOutput::Rate(QString msg, int sd)
+{
+    int rating=0;
+    ParseInputOutput::lastJob = RATE_JOB;
+    char mesaj[1001];
+    memset(mesaj, 0, 1000);
+    QStringList args = msg.split(QRegExp("(\\ )"));
+    if(args.length()<2) return false;
+        // doar verificare
+        int id_carte = args[1].toInt();
+        if (read (sd, mesaj, 1000) < 0)
+        {
+            perror ("[client]Eroare la read() de la server.\n");
+            return errno;
+        }
+        QString tmpMesage(mesaj);
+        QStringList parsedMsg = tmpMesage.split(QRegExp("(\\ )"));
+
+        ClientThread::userRating = parsedMsg[0].toInt();
+        ClientThread::currentRating = parsedMsg[1].toDouble();
+        qDebug()<<tmpMesage;
+        return true;
+
+//    return false;
+}
+
 ParseInputOutput::ParseInputOutput()
 {
 
@@ -76,7 +103,6 @@ bool ParseInputOutput::Parse(std::unique_ptr<QString>& pendingMsg, int sd)
         }
     }
     *pendingMsg = " ";
-    qDebug()<<"OOPS";
     return 1;
 }
 

@@ -28,6 +28,7 @@
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<QVector<Book> >();
+    qRegisterMetaType<Book>();
     QApplication a(argc, argv);
 
     ClientWindow w;

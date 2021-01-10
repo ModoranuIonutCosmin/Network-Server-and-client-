@@ -17,16 +17,35 @@ class BookInspect : public QWidget
 public:
     explicit BookInspect(Book b, QWidget *parent = nullptr);
     void Setuip(int id, QString nume);
-    QPushButton* loginButton;
+    QPushButton* downloadButton;
     QPushButton* goBack;
+    QPushButton* oneStar;
+    QPushButton* twoStars;
+    QPushButton* threeStars;
+    QPushButton* fourStars;
+    QPushButton* fiveStars;
+    QPushButton* rateButton;
+    QPushButton* refresh;
     QVBoxLayout* mainLayout;
+    QVBoxLayout* ratingLayout;
+    QHBoxLayout* buttonLayout;
+    QHBoxLayout* refreshLayout;
     QLabel* name;
     QLabel* rating;
     Book date;
-    int id_carte = 0;
+    double ratingPoints = -1;
+    int id_carte;
 signals:
 private slots:
     void Download();
+    void ChangeRating(int, double);
+    void ChangeRatingToOne();
+    void ChangeRatingToTwo();
+    void ChangeRatingToThree();
+    void ChangeRatingToFour();
+    void ChangeRatingToFive();
+    void RequestRatingChange();
+    void UpdateData();
 
 };
 

@@ -18,11 +18,15 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
     author = new QLineEdit(this);
     ISBN = new QLineEdit(this);
     gen = new QLineEdit(this);
+    rating = new QLineEdit(this);
+    an = new QLineEdit(this);
     //    filtersON = new QCheckBox("Filters", this);
 
     AuthorLabel = new QLabel("Author:", this);
     genLabel = new QLabel("Gen:", this);
     ISBNLabel = new QLabel("ISBN:", this);
+    ratingLabel = new QLabel("Rating:", this);
+    anLabel = new QLabel("An:", this);
 
     searchButton = new QPushButton("Search", this);
     goToRecomandations = new QPushButton("Recommandations");
@@ -40,7 +44,10 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
     filters->addWidget(ISBN);
     filters->addWidget(genLabel);
     filters->addWidget(gen);
-
+    filters->addWidget(ratingLabel);
+    filters->addWidget(rating);
+    filters->addWidget(anLabel);
+    filters->addWidget(an);
 
     sideMenu->addStretch(1);
     sideMenu->addWidget(goBack);
@@ -81,13 +88,15 @@ void DashboardUI::ChangeContent()
     //    auto h = new QListWidgetItem();
     //    h->setSizeHint(QSize(80, 100));
     //    searchResults->addItem(h);
-
+    QString querry = "@SEARCH "+this->searchField->text()+"|"+this->author->text()+
+            "|"+this->gen->text() + "|"+this->ISBN->text() +"|"+this->rating->text()+"|"+this->an->text();
+    if(querry == latestQuerry) return;
     //    searchResults->setItemWidget(h, v);
     //    records.append(v);
     //    items.append(h);
+    this->latestQuerry = querry;
     ClientThread::messageProtect.lock();
-    *(ClientThread::pendingMessage) = "@SEARCH "+this->searchField->text()+"|"+this->author->text()+
-            "|"+this->gen->text() + "|"+this->ISBN->text();
+    *(ClientThread::pendingMessage) =querry;
     ClientThread::messageProtect.unlock();
     //    records.back()->Setup("book", "1/5", "100");
     //    menu->setVisible(false);
@@ -103,6 +112,7 @@ void DashboardUI::AppendBooks(QVector<Book> books)
         this->searchButton->setEnabled(false);
         return;
     }
+    DeleteAllItems();
     NoClicks++;
     for(auto& book: books)
     {
@@ -113,7 +123,7 @@ void DashboardUI::AppendBooks(QVector<Book> books)
         records.append(v);
         items.append(h);
         searchResults->setItemWidget(h, v);
-        records.back()->Setup(book.title, book.author, book.genre, book.ISBN, book.id_carte);
+        records.back()->Setup(book.title, book.author, book.genre, book.ISBN, book.rating, book.an, book.id_carte);
 
         fflush(stdout);
     }

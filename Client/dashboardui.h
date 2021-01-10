@@ -40,9 +40,13 @@ public:
     QLineEdit* author;
     QLineEdit* ISBN;
     QLineEdit* gen;
+    QLineEdit* an;
+    QLineEdit* rating;
     QLabel* AuthorLabel;
     QLabel* ISBNLabel;
     QLabel* genLabel;
+    QLabel* ratingLabel;
+    QLabel* anLabel;
     QCheckBox* filtersON;
     QWidget* filterHide;
     Spoiler* spoiler;
@@ -54,7 +58,7 @@ public:
     QPushButton* publish;
     QList<searchResultsItem*> records;
     QList<QListWidgetItem*> items;
-
+    QString latestQuerry =" ";
     //spam protection
     QTimer tryAgain;
     size_t NoClicks=0;

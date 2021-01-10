@@ -10,15 +10,19 @@ class Book
 {
 public:
     Book();
-    Book(QString title, QString author, QString genre, QString ISBN, int id_carte=UNDEFINED_BOOK);
+    Book(QString title, QString author, QString genre, QString ISBN,QString rating, int an, int id_carte);
     QString title;
     QString author;
     QString genre;
     QString rating;
     QString ISBN;
+    int an;
+    int id_carte;
+
     static QVector<Book> ParseBookString(QString mesaj);
-int id_carte;
+
 };
 Q_DECLARE_METATYPE(QVector<Book>);
+Q_DECLARE_METATYPE(Book);
 
 #endif // BOOK_H

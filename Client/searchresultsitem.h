@@ -17,7 +17,7 @@ class searchResultsItem : public QWidget
     Q_OBJECT
 public:
     explicit searchResultsItem(QWidget *parent = nullptr);
-    void Setup(QString name, QString autor, QString gen, QString ISBN, int id_carte);
+    void Setup(QString name, QString autor, QString gen, QString ISBN, QString rating, int an, int id_carte);
     Book Get() const;
 signals:
 //    void dataChanged(QModelIndex,QModelIndex,QVector<int>);

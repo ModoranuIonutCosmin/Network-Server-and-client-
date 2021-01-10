@@ -41,6 +41,7 @@ private:
     Recommandations* rs = nullptr;
     BookInspect* v = nullptr ;
     PublishPage* pb = nullptr;
+    ClientThread* worker = nullptr;
     int currentPage = 0;
 };
 #endif // CLIENTWINDOW_H

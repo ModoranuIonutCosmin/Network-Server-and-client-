@@ -9,7 +9,7 @@ ClientWindow::ClientWindow(QWidget *parent)
 
     // RUN CLIENT ON WORKER THREAD!!
     QThread* Thread = new QThread;
-    ClientThread* worker = new ClientThread();
+    worker = new ClientThread();
     worker->moveToThread(Thread);
     connect(worker, SIGNAL(loginSuccesful()), this, SLOT(userLoggedIn()));
     connect(Thread, SIGNAL(started()), worker, SLOT(HandleClient()));
@@ -73,6 +73,11 @@ void ClientWindow::doPage(Book b)
     this->pageHolder->addWidget(v);
     this->pageHolder->setCurrentWidget(v);
     connect(v->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboardAndCleanUpBookInspect()));
+    connect(worker, SIGNAL(ModifyRating(int, double)), v, SLOT(ChangeRating(int, double)));
+
+    ClientThread::messageProtect.lock();
+    *(ClientThread::pendingMessage) = "@RATE -1 " + QString::number(b.id_carte);
+    ClientThread::messageProtect.unlock();
 }
 
 void ClientWindow::ShowRecommandations()

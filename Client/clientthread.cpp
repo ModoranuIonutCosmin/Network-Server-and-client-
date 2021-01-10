@@ -15,6 +15,10 @@
 std::unique_ptr<QString> ClientThread::pendingMessage = std::make_unique<QString>(" ");
 std::mutex ClientThread::messageProtect;
 std::unique_ptr<QString> ClientThread::userEmail = std::make_unique<QString>("");
+double ClientThread::currentRating = -1;
+
+int ClientThread::userRating = -1;
+
 ClientThread::ClientThread(QObject *parent) : QObject(parent)
 {
     if(InitializeClient()<0) return;
@@ -69,6 +73,9 @@ void ClientThread::DoCleanup()
         break;
         case AQUIRE_JOB:
              emit sendBooks(ParseInputOutput::result);
+        break;
+        case RATE_JOB:
+            emit ModifyRating(ClientThread::userRating, ClientThread::currentRating);
         break;
     default:
         break;

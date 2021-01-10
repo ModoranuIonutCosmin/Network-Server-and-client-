@@ -78,6 +78,8 @@ PublishPage::PublishPage(QWidget *parent) : QWidget(parent)
 
      connect(this->proceed, SIGNAL(clicked()), this, SLOT(CheckIfValidInputs()));
      connect(this->browse, SIGNAL(clicked()), this, SLOT(BrowseForPath()));
+     connect(this->gen, SIGNAL(textChanged(QString)), this, SLOT(replaceSpacesWithSemicolon(QString)));
+     connect(this->gen, SIGNAL(editingFinished()), this, SLOT(trimSemicolon()));
 }
 
 bool PublishPage::CheckIfValidInputs()
@@ -130,6 +132,22 @@ void PublishPage::BrowseForPath()
                            "~/",
                            tr("PDF Doc (*.pdf);;Words files(*.doc)"));
     this->path->setText(fileName);
+}
+
+void PublishPage::replaceSpacesWithSemicolon(QString)
+{
+    this->gen->setText(this->gen->text().replace(' ', ';'));
+}
+
+void PublishPage::trimSemicolon()
+{
+    int index1=this->gen->text().lastIndexOf(';');
+    int index2=this->gen->text().length() - 1;
+    if(index1== index2)
+    {
+        QString str = this->gen->text().left(index1);
+        this->gen->setText(str);
+    }
 }
 
 void PublishPage::UserNameUpdated()
