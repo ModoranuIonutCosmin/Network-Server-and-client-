@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <QPair>
 #include "transferscontroller.h"
 
 class NetCODE
@@ -31,7 +32,9 @@ public:
     static bool Search(QString, int);
     static bool Download(QString, int);
     static bool Upload(QString, int);
+    static bool Rate(QString, int);
     static bool addConnection(Connection con);
+    static int GetIDFromCD(int cd);
     static void removeConnection(int cd);
     static bool updateConnectionData(int cd, QString& email, int id);
     static NetCODE* instanta ;

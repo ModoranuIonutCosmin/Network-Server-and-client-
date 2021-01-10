@@ -8,18 +8,18 @@ class Book
 {
 public:
     Book();
-    Book(QString title, QString author, QString genre, QString ISBN,  int id_carte);
-    Book(QString title, QString author, QString genre, QString ISBN, QString an );
+    Book(QString title, QString author, QVector<QString> genre, QString ISBN, QString rating, int an );
+    Book(QString title, QString author, QVector<QString> genre, QString ISBN, int an );
     static QString DoListAsMessage(QVector<Book>& carti);
     static Book DoMessageAsBook(QString msg);
-QString title;
-QString author;
-QString genre;
-QString an;
-QString rating;
-QString ISBN;
+    QString title;
+    QString author;
+    QVector<QString> genre;
+    int an;
+    int id_carte;
+    QString rating;
+    QString ISBN;
 
-int id_carte;
 };
 
 #endif // BOOK_H

@@ -26,18 +26,19 @@ class NetworkServer : public QObject
     Q_OBJECT
 public:
     explicit NetworkServer(QObject *parent = nullptr);
-
+    static void CloseDown(int);
 
 signals:
     void finished();
     void OnMessageReceived(QString text);
+
 private slots:
     int StartServer();
     int RelayText(QString text);
     int ListenCon();
 private:
     QTimer* timer;
-    int sock=-1;
+    static int sock;
 };
 
 #endif // NETWORKSERVER_H

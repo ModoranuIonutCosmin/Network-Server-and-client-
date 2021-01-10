@@ -4,13 +4,19 @@
 #define PORT 2024
 extern int errno;
 
-
+int NetworkServer::sock = -1;
 NetworkServer::NetworkServer(QObject *parent) : QObject(parent)
 {
     //StartServer();
+//    signal(SIGHUP, CloseDown);
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(ListenCon()));
     timer->start(0);
+}
+
+void NetworkServer::CloseDown(int)
+{
+    close(sock);
 }
 
 
@@ -20,7 +26,9 @@ int NetworkServer::StartServer()
 
     struct sockaddr_in address;
 
-
+    int val = 1;
+    setsockopt(sock,SOL_SOCKET,SO_REUSEPORT,&val,sizeof(int));
+    //FA PORTUL SA FIE REFOLOSIBIL IMEDIAT (nu sunt riscuri de misdirectionare)
 
     /* create socket */
         this->sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -44,13 +52,12 @@ int NetworkServer::StartServer()
         }
 
         /* listen on port */
-        if (listen(sock, 500) < 0)
+        if (listen(sock, 32) < 0) //cat tin maxim in coada?
         {
 
             return -5;
         }
-        int val = 1;
-        setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&val,sizeof(int));
+
         printf(": ready and listening\n");
 
 

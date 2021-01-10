@@ -16,6 +16,9 @@ SOURCES += \
     mmain.cpp \
     netcode.cpp \
     networkserver.cpp \
+    rbook.cpp \
+    recommendengine.cpp \
+    rrating.cpp \
     serverwindow.cpp \
     sqlcontroller.cpp \
     stringhelpers.cpp \
@@ -28,6 +31,9 @@ HEADERS += \
     enumhelpers.h \
     netcode.h \
     networkserver.h \
+    rbook.h \
+    recommendengine.h \
+    rrating.h \
     serverwindow.h \
     sqlcontroller.h \
     stringhelpers.h \

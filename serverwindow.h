@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "sqlcontroller.h"
+#include "recommendengine.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class ServerWindow; }
 QT_END_NAMESPACE
@@ -17,6 +18,7 @@ public:
     ~ServerWindow();
 private slots:
     void UpdateUiText(QString text);
+    void recommend();
 private:
     Ui::ServerWindow *ui;
 };

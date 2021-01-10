@@ -6,7 +6,8 @@ std::map<QString, std::function<bool(QString, int)>>
                                     {QString("@LOGIN"), NetCODE::Login},
                                     {QString("@SEARCH"), NetCODE::Search},
                                     {QString("@DOWNLOAD"), NetCODE::Download},
-                                    {QString("@UPLOAD"), NetCODE::Upload}
+                                    {QString("@UPLOAD"), NetCODE::Upload},
+                                    {QString("@RATE"), NetCODE::Rate}
                                 };
 QMutex NetCODE::connectionsCS;
 NetCODE* NetCODE::instanta = nullptr;
@@ -107,7 +108,7 @@ bool NetCODE::Download(QString msg, int cd)
 bool NetCODE::Upload(QString args, int cd)
 {
     int uploadSize = 0;
-    Book b = Book::DoMessageAsBook(args.split(QRegExp("(\\ )")).toVector()[0]);
+    Book b = Book::DoMessageAsBook(args);
 
 
     if (read (cd, &uploadSize, sizeof(int)) < 0)
@@ -132,10 +133,7 @@ bool NetCODE::Upload(QString args, int cd)
     int index = 0;
     while(uploadSize>0)
     {
-        if(uploadSize <= 1499)
-        {
-            int a=5;
-        }
+
         unsigned char pachet[1501];
 
         if ((received = read (cd, pachet, sizeof(unsigned char)*std::min(uploadSize, 1499))) < 0)
@@ -157,12 +155,74 @@ bool NetCODE::Upload(QString args, int cd)
     return 1;
 }
 
+bool NetCODE::Rate(QString arg, int cd)
+{
+
+    QStringList args = arg.split(QRegExp("(\\ )"));
+    if(args.length()<2)
+        return false;
+    //Verifica daca exista record-ul deja
+    int userID = GetIDFromCD(cd);
+    int id_carte = args[1].toInt();
+    QString rez = SQLController::ReadRating(id_carte, userID); //userRating, bookRating
+    QStringList lista = rez.split(QRegExp("(\\ )"));
+    int userRating = lista[0].toInt(); //-1 daca nu exista
+    double bookRating = lista[1].toDouble(); //0 ...
+    if(args[0].toInt() == -1)
+    {
+        write(cd, rez.toStdString().c_str(), sizeof(char)*rez.length());
+        return true;
+    }
+    else if(args[0].toInt() >=0)
+    {
+        int ratingDeScris = args[0].toInt();
+        auto sumCount = SQLController::GetSumAndRatingCount(id_carte);
+        sumCount.first +=ratingDeScris;
+
+        if(userRating == -1)
+        {
+            //insert
+            sumCount.second++;
+            SQLController::InsertRating(id_carte, userID, ratingDeScris);
+        }
+        else
+        {
+            sumCount.first-= userRating;
+
+            //update
+            SQLController::UpdateUserRating(id_carte, userID, ratingDeScris);
+        }
+        double avg = (double)sumCount.first/sumCount.second;
+        SQLController::UpdateBookRating(id_carte, avg);
+        QString ret = QString::number(ratingDeScris)+" "+QString::number(avg, 'f', 2);
+        write(cd, ret.toStdString().c_str(), 1000*sizeof(char));
+
+    }
+    return true;
+}
+
 bool NetCODE::addConnection(Connection con)
 {
     QMutexLocker mtx(&connectionsCS);
         connections->append(con);
         mtx.unlock();
         return 1;
+}
+
+int NetCODE::GetIDFromCD(int cd)
+{
+    NetCODE::connectionsCS.lock();
+    for(int i=0;i< (connections)->size(); i++)
+    {
+        if((*connections)[i].cd == cd)
+        {
+            int rez = (*connections)[i].ID;
+            NetCODE::connectionsCS.unlock();
+            return rez ;
+        }
+    }
+    NetCODE::connectionsCS.unlock();
+    return -1;
 }
 
 void NetCODE::removeConnection(int cd)

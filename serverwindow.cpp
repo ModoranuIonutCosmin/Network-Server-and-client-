@@ -3,14 +3,21 @@
 #include "QTextEdit"
 #include <iostream>
 #include <QThread>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include "networkserver.h"
 #include "stringhelpers.h"
 ServerWindow::ServerWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ServerWindow)
 {
+
     ui->setupUi(this);
-    ui->textEdit3->setText("HEllo world");
+    QPushButton* proceed = new QPushButton("Recommend");
+   QVBoxLayout* mainLayout   = new QVBoxLayout();
+    proceed->setLayout(mainLayout);
+    setCentralWidget(proceed);
+    connect(proceed, SIGNAL(clicked()), this, SLOT(recommend()));
     QThread* thread = new QThread;
     NetworkServer* worker = new NetworkServer();
     worker->moveToThread(thread);
@@ -30,8 +37,14 @@ ServerWindow::~ServerWindow()
 
 void ServerWindow::UpdateUiText(QString text)
 {
-    ui->textEdit3->setText(text);
+//    ui->textEdit3->setText(text);
     std::cout<<"Doing stuff";
     fflush(stdout);
+}
+
+void ServerWindow::recommend()
+{
+    RecommendEngine re(1);
+    re.GetRecommandations();
 }
 
