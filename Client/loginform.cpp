@@ -3,6 +3,7 @@
 LoginForm::LoginForm(QWidget *parent) : QWidget(parent)
 {
     loginButton       = new QPushButton("Login", parent);
+    loginButton->setMinimumSize(120, 70);
     userField     = new QLineEdit(parent);
     passwordField = new QLineEdit(parent);
     passwordField->setEchoMode(QLineEdit::Password);
@@ -42,6 +43,7 @@ LoginForm::LoginForm(QWidget *parent) : QWidget(parent)
     mainLayout->addLayout(passwordLineAndField);
     mainLayout->addWidget(loginButton);
     mainLayout->addWidget(hintText);
+    mainLayout->setAlignment(loginButton, Qt::AlignHCenter);
 
     //SET UP VIEW MODEL
     vm = new QStandardItemModel(1, 3, this);
@@ -59,7 +61,14 @@ LoginForm::LoginForm(QWidget *parent) : QWidget(parent)
     mapper->addMapping(passwordField, 2);
     mapper->toFirst();
 //    connect(vm, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(GoNextPage(QStandardItem*)));
-//    connect(this->loginButton, SIGNAL(clicked()), this, SLOT(GoNextPage()));
+    //    connect(this->loginButton, SIGNAL(clicked()), this, SLOT(GoNextPage()));
+}
+
+void LoginForm::Empty()
+{
+    vm->item(0,1)->setText("");
+    vm->item(0, 2)->setText("");
+    this->hintText->setText(" ");
 }
 
 void LoginForm::ShowHint()

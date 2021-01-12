@@ -22,6 +22,7 @@ public:
     static std::unique_ptr<QString> userEmail; // needs protecting
     static double currentRating;
     static int userRating;
+    static int ServerLive;
     explicit ClientThread(QObject *parent = nullptr);
     int InitializeClient();
     void DoCleanup();
@@ -32,6 +33,7 @@ signals:
     void loginFailed();
     void ModifyRating(int, double);
     void sendBooks(QVector<Book>); // To ui!
+    void sendBooksRec(QVector<Book>); // To ui!
     void createBooks(QVector<Book>); // To ui!
 private slots:
     int HandleClient();

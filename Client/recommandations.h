@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QLineEdit>
+#include <QVector>
 #include <QMenu>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -11,6 +12,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QList>
+#include "clientthread.h"
 #include "book.h"
 #include "searchresultsitem.h"
 class Recommandations : public QWidget
@@ -37,14 +39,20 @@ public:
     QLineEdit* searchField;
     QPushButton* searchButton;
     QPushButton* goBack;
-    QPushButton* goToRecomandations;
+    QPushButton* loadRecommandations;
 
     QList<searchResultsItem*> records;
     QList<QListWidgetItem*> items;
+    void DeleteAllItems();
+
 signals:
+    void MoveToPage(QListWidgetItem*);
+    void DoBookPage(Book b);
 private slots:
     void DoBooksList(QVector<Book> books);
-    void GetClickedBook(QListWidgetItem* item);
+    void GetClickedItem(QListWidgetItem*);
+    void GetRecommandations();
+
 };
 
 #endif // RECOMMANDATIONS_H

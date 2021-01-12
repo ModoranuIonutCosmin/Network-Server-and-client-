@@ -19,19 +19,32 @@ public:
     void Setuip(int id, QString nume);
     QPushButton* downloadButton;
     QPushButton* goBack;
+
     QPushButton* oneStar;
     QPushButton* twoStars;
     QPushButton* threeStars;
     QPushButton* fourStars;
     QPushButton* fiveStars;
     QPushButton* rateButton;
+
     QPushButton* refresh;
     QVBoxLayout* mainLayout;
     QVBoxLayout* ratingLayout;
     QHBoxLayout* buttonLayout;
     QHBoxLayout* refreshLayout;
+    QVBoxLayout* statsLayout;
     QLabel* name;
     QLabel* rating;
+    QLabel* author;
+    QLabel* genres;
+    QLabel* ISBN;
+    QLabel* an;
+    QLabel* anLabel;
+    QLabel* ISBNLabel;
+    QLabel* genresLabel;
+    QLabel* authorLabel;
+    QLabel* bookNameLabel;
+    QLabel* ratingLabel;
     Book date;
     double ratingPoints = -1;
     int id_carte;

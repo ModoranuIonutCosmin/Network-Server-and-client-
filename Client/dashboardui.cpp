@@ -30,10 +30,10 @@ DashboardUI::DashboardUI(QWidget *parent) : QWidget(parent)
 
     searchButton = new QPushButton("Search", this);
     goToRecomandations = new QPushButton("Recommandations");
-    goBack = new QPushButton("GO back", this);
+    goBack = new QPushButton("Log out", this);
     publish = new QPushButton("Publish", this);
     searchResults = new QListWidget(this);
-
+    searchResults->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     searchBar->addWidget(searchField);
     searchBar->addWidget(searchButton);
@@ -105,7 +105,7 @@ void DashboardUI::ChangeContent()
 
 void DashboardUI::AppendBooks(QVector<Book> books)
 {
-    qDebug()<<"Appendam carti!!!"<<Qt::endl;
+//    qDebug()<<"Appendam carti!!!"<<Qt::endl;
     //sters initiale?
     if(this->NoClicks >= MAX_CLICKS_PER_TIME)
     {

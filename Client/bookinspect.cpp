@@ -3,12 +3,31 @@
 BookInspect::BookInspect(Book b, QWidget *parent) :QWidget(parent)
 {
     downloadButton = new QPushButton(QString::number(b.id_carte), parent);
-    name = new QLabel(" ");
-    rating = new QLabel(" ");
+    name        =      new QLabel(" ");
+    rating  =        new QLabel(" ");
+
+    author        = new QLabel(" ", this)      ;
+    genres        = new QLabel(" ", this)      ;
+    ISBN          = new QLabel(" ", this)      ;
+    an            = new QLabel(" ", this)      ;
+    anLabel       = new QLabel("An", this)      ;
+    anLabel->setStyleSheet("QLabel { color : red; }");
+    ISBNLabel     = new QLabel("ISBN", this)      ;
+    ISBNLabel->setStyleSheet("QLabel { color : red; }");
+    genresLabel   = new QLabel("Gen", this)      ;
+    genresLabel->setStyleSheet("QLabel { color : red; }");
+    authorLabel   = new QLabel("Autor", this)      ;
+    authorLabel->setStyleSheet("QLabel { color : red; }");
+    bookNameLabel = new QLabel("Titlu", this)      ;
+    bookNameLabel->setStyleSheet("QLabel { color : red; }");
+     ratingLabel  = new QLabel("Rating", this)      ;
+     rating->setStyleSheet("QLabel { color : orange; }");
+     ratingLabel->setStyleSheet("QLabel { color : red; }");
     goBack = new QPushButton("Go back");
     ratingLayout = new QVBoxLayout();
     buttonLayout = new QHBoxLayout();
     refreshLayout = new QHBoxLayout();
+      statsLayout = new QVBoxLayout();
 
     rateButton = new QPushButton("Rate");
     oneStar     = new QPushButton("1");
@@ -18,26 +37,64 @@ BookInspect::BookInspect(Book b, QWidget *parent) :QWidget(parent)
     fiveStars   = new QPushButton("5");
     refresh = new QPushButton("Refresh");
 
+
+
     buttonLayout->addWidget(oneStar   );
     buttonLayout->addWidget(twoStars  );
     buttonLayout->addWidget(threeStars);
     buttonLayout->addWidget(fourStars );
     buttonLayout->addWidget(fiveStars );
 
-    refreshLayout->addWidget(rating);
+
     refreshLayout->addWidget(refresh);
 
 
+
+
     mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(bookNameLabel);
     mainLayout->addWidget(name);
+    mainLayout->addWidget(authorLabel);
+    mainLayout->addWidget(author);
+     mainLayout->addWidget(genresLabel);
+    mainLayout->addWidget(genres);
+     mainLayout->addWidget(ISBNLabel);
+    mainLayout->addWidget(ISBN);
+    mainLayout->addWidget(ratingLabel);
+    mainLayout->addWidget(rating);
+    mainLayout->addWidget(anLabel);
+    mainLayout->addWidget(an);
+    mainLayout->addLayout(refreshLayout);
     mainLayout->addLayout(buttonLayout);
     mainLayout->addWidget(rateButton);
-    mainLayout->addLayout(refreshLayout);
+
+    statsLayout  ->setAlignment(name         ,Qt::AlignCenter)  ;
+    statsLayout  ->setAlignment(rating       ,Qt::AlignCenter);
+    statsLayout  ->setAlignment(author       ,Qt::AlignCenter);
+    statsLayout  ->setAlignment(genres       ,Qt::AlignCenter);
+    statsLayout  ->setAlignment(ISBN         ,Qt::AlignCenter);
+    statsLayout  ->setAlignment(an           ,Qt::AlignCenter);
+    statsLayout  ->setAlignment(anLabel      ,Qt::AlignCenter);
+    statsLayout->setAlignment  (bookNameLabel,Qt::AlignCenter)  ;
+    statsLayout->setAlignment  (ratingLabel  ,Qt::AlignCenter)  ;
+    statsLayout->setAlignment  (authorLabel  ,Qt::AlignCenter)  ;
+    statsLayout->setAlignment  (genresLabel  ,Qt::AlignCenter)  ;
+    statsLayout->setAlignment  (ISBNLabel    ,Qt::AlignCenter)  ;
+    statsLayout->setAlignment(Qt::AlignCenter);
+
+
+    mainLayout->addLayout(statsLayout);
+    mainLayout->setAlignment(statsLayout, Qt::AlignCenter);
     mainLayout->addWidget(downloadButton);
     mainLayout->addWidget(goBack);
     date = b;
     this->id_carte = b.id_carte;
+    this->author->setText(b.author);
+    this->genres->setText(b.genre);
+    this->ISBN->setText(b.ISBN);
+    this->an->setText(QString::number(b.an));
     this->name->setText(b.title);
+
     connect(downloadButton, SIGNAL(clicked()), this, SLOT(Download()));
     connect(oneStar, SIGNAL(clicked()), this, SLOT(ChangeRatingToOne()));
     connect(twoStars, SIGNAL(clicked()), this, SLOT(ChangeRatingToTwo()));

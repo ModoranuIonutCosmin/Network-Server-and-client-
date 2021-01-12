@@ -26,6 +26,7 @@ Recommandations::Recommandations(QWidget *parent) : QWidget(parent)
 
     goBack = new QPushButton("GO back", this);
     searchResults = new QListWidget(this);
+    loadRecommandations = new QPushButton("Load recommandations");
 
 
 
@@ -34,12 +35,12 @@ Recommandations::Recommandations(QWidget *parent) : QWidget(parent)
     sideMenu->addWidget(goBack);
     sideMenu->addStretch(1);
     sideMenu->setAlignment(goBack, Qt::AlignVCenter);
-    sideMenu->setAlignment(goToRecomandations, Qt::AlignVCenter);
 
 
     menu->addMenu(settings);
 
     content->addWidget(searchResults);
+    content->addWidget(loadRecommandations);
 
 
     sideMenuAndContent->addLayout(sideMenu);
@@ -52,8 +53,9 @@ Recommandations::Recommandations(QWidget *parent) : QWidget(parent)
 
 //    connect(this->searchButton, SIGNAL(clicked()), this, SLOT(ChangeContent()));
 //    connect(this->goBack, SIGNAL(clicked()), this, SLOT(DeleteAllItems()));
-    connect(searchResults, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(GetClickedBook(QListWidgetItem*)));
+     connect(searchResults, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(GetClickedItem(QListWidgetItem*)));
 //    connect(&tryAgain, SIGNAL(timeout()), this, SLOT(CheckSpam()));
+     connect(loadRecommandations, SIGNAL(clicked()), this, SLOT(GetRecommandations()));
 }
 
 void Recommandations::DoBooksList(QVector<Book> books)
@@ -73,7 +75,40 @@ void Recommandations::DoBooksList(QVector<Book> books)
     }
 }
 
-void Recommandations::GetClickedBook(QListWidgetItem *item)
+void Recommandations::GetClickedItem(QListWidgetItem* item)
 {
+    for(auto i=0; i<items.length(); i++)
+    {
+        if(items[i] == item)
+        {
+            std::cout<<"GAsesc un id = "<<records[i]->id_carte<<std::endl;
+            fflush(stdout);
+            emit DoBookPage(records[i]->Get());
+            break;
+        }
+    }
+}
 
+void Recommandations::DeleteAllItems()
+{
+    //    searchResults->clear();
+    //    qDeleteAll(records.begin(), records.end());
+    {
+        for(int i=0; i<items.length(); i++)
+        {
+            searchResults->takeItem(i);
+            delete items[i];
+            delete records[i];
+        }
+
+    }
+    records.clear();
+    items.clear();
+}
+
+void Recommandations::GetRecommandations()
+{
+    ClientThread::messageProtect.lock();
+    *(ClientThread::pendingMessage) = "@RECOMMEND";
+    ClientThread::messageProtect.unlock();
 }

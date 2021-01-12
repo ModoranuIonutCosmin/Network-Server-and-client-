@@ -11,6 +11,53 @@ searchResultsItem::searchResultsItem(QWidget *parent) : QWidget(parent)
     genres = new QLabel(" ", this);
     ratingText = new QLabel(" ", this);
     viewsNum = new QLabel(" ", this);
+    an = new QLabel(" ", this);
+
+     anLabel       = new QLabel("An", this)               ;
+     ISBNLabel     = new QLabel("ISBN", this)               ;
+     genresLabel   = new QLabel("Gen", this)             ;
+     authorLabel   = new QLabel("Autor", this)             ;
+     bookNameLabel = new QLabel("Titlu", this)             ;
+    ratingLabel = new QLabel("Rating", this);
+
+
+     ratingLay= new QVBoxLayout();
+     anLay        = new QVBoxLayout()  ;
+     ISBNLay      = new QVBoxLayout()  ;
+     genreLay     = new QVBoxLayout()  ;
+     authorLay    = new QVBoxLayout()  ;
+     bookNameLay  = new QVBoxLayout()  ;
+
+
+
+     authorLay->addWidget(this->bookNameLabel);
+     authorLay->addWidget(this->author);
+
+
+     bookNameLay->addWidget(this->authorLabel);
+     bookNameLay->addWidget(this->bookName);
+
+
+     genreLay->addWidget(genresLabel);
+      genreLay->addWidget(genres);
+
+      ISBNLay->addWidget(ISBNLabel);
+      ISBNLay->addWidget(viewsNum);
+
+      ratingLay->addWidget(ratingLabel);
+      ratingLay->addWidget(ratingText);
+
+
+     anLay->addWidget(anLabel);
+     anLay->addWidget(an);
+
+//     author, 0,  T
+//     bookName,   A
+//     genres, 2, G
+//     viewsNum,  I
+//     ratingText R
+//     an, 5, "te A
+
 
 
 
@@ -28,13 +75,29 @@ searchResultsItem::searchResultsItem(QWidget *parent) : QWidget(parent)
 //    labelIcon->setLineWidth(10);
 
     mainLayout->addWidget(labelIcon);
-    mainLayout->addWidget(author);
-    mainLayout->addWidget(bookName);
-    mainLayout->addWidget(genres);
-    mainLayout->addWidget(viewsNum);
-    mainLayout->addWidget(ratingText);
+
+    mainLayout->addLayout(authorLay);
+
+//    authorLay->addStretch(1);
+//    mainLayout->addStretch(4);
+    mainLayout->addLayout(bookNameLay);
 
     mainLayout->addStretch(1);
+//    bookNameLay->addStretch(1);
+//    mainLayout->addStretch(2);
+    mainLayout->addLayout(genreLay);
+
+
+    mainLayout->addLayout(ISBNLay);
+
+//    mainLayout->addStretch(1);
+    mainLayout->addStretch(1);
+    mainLayout->addLayout(ratingLay);
+
+    mainLayout->addLayout(anLay);
+
+
+
 
 
     //SET UP VIEW MODEL
@@ -49,14 +112,18 @@ searchResultsItem::searchResultsItem(QWidget *parent) : QWidget(parent)
     vm->setItem(0, 3, item4);
     QStandardItem* item5 = new QStandardItem("5/5");
     vm->setItem(0, 4, item5);
+    QStandardItem* item6 = new QStandardItem("5/5");
+    vm->setItem(0, 5, item6);
+
 
     mapper = new QDataWidgetMapper();
     mapper->setModel(vm);
-    mapper->addMapping(this->author, 0, "text");
-    mapper->addMapping(this->bookName, 1, "text");
-    mapper->addMapping(this->genres, 2, "text");
-    mapper->addMapping(this->viewsNum, 3, "text");
-    mapper->addMapping(this->ratingText, 4, "text");
+    mapper->addMapping(this->author, 0, "text");   //T
+    mapper->addMapping(this->bookName, 1, "text"); //A
+    mapper->addMapping(this->genres, 2, "text");   //G
+    mapper->addMapping(this->viewsNum, 3, "text"); //I
+    mapper->addMapping(this->ratingText, 4, "text");//R
+    mapper->addMapping(this->an, 5, "text"); //A
 
     mapper->toFirst();
 
@@ -65,12 +132,21 @@ void searchResultsItem::Setup(QString name, QString autor, QString gen, QString 
 {
     // an
     fullyInitialized = 1;
-    this->vm->setItem(0, 0, new QStandardItem(name));
-    this->vm->setItem(0, 1, new QStandardItem(autor));
-    this->vm->setItem(0, 2, new QStandardItem(gen));
-    this->vm->setItem(0, 3, new QStandardItem(ISBN));
-    this->vm->setItem(0, 4, new QStandardItem(rating));
-    this->vm->setItem(0, 5, new QStandardItem(an));
+    QString name1(name), autor1(autor), gen1(gen), ISBN1(ISBN), rating1(rating), an1(QString::number(an));
+    name1 = name1.leftJustified(60, ' ');
+    autor1 = autor1.leftJustified(60, ' ');
+    gen1 = gen1.leftJustified(60, ' ');
+    ISBN1 = ISBN1.leftJustified(60, ' ');
+    rating1 = (rating1+"/5").leftJustified(58, ' ');
+    an1 = an1.leftJustified(60, ' ');
+    name1 = name1.replace('_', ' ');
+
+    this->vm->setItem(0, 0, new QStandardItem(name1));
+    this->vm->setItem(0, 1, new QStandardItem(autor1));
+    this->vm->setItem(0, 2, new QStandardItem(gen1));
+    this->vm->setItem(0, 3, new QStandardItem(ISBN1));
+    this->vm->setItem(0, 4, new QStandardItem(rating1));
+    this->vm->setItem(0, 5, new QStandardItem(an1));
     id_carte = id;
 }
 

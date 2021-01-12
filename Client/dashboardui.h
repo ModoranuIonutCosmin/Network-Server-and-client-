@@ -64,6 +64,7 @@ public:
     size_t NoClicks=0;
 
     static int ultima_carte;
+     void DeleteAllItems();
 signals:
    void DoBookPage(Book b);
    void DoRecommandationsPage();
@@ -72,7 +73,7 @@ private slots:
    void AppendBooks(QVector<Book> books);
    void GetClickedBook(QListWidgetItem* item);
    void ShowRecommandations();
-   void DeleteAllItems();
+
    void CheckSpam();
 
 };

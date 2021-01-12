@@ -11,12 +11,12 @@
 #include <string.h>
 #include <iostream>
 #include <QCoreApplication>
-
+#define READ_SIZE 12000
 std::unique_ptr<QString> ClientThread::pendingMessage = std::make_unique<QString>(" ");
 std::mutex ClientThread::messageProtect;
 std::unique_ptr<QString> ClientThread::userEmail = std::make_unique<QString>("");
 double ClientThread::currentRating = -1;
-
+int ClientThread::ServerLive = 1;
 int ClientThread::userRating = -1;
 
 ClientThread::ClientThread(QObject *parent) : QObject(parent)
@@ -77,6 +77,9 @@ void ClientThread::DoCleanup()
         case RATE_JOB:
             emit ModifyRating(ClientThread::userRating, ClientThread::currentRating);
         break;
+            case RECOMMEND_JOB:
+            emit sendBooksRec(ParseInputOutput::result);
+        break;
     default:
         break;
     }
@@ -84,19 +87,20 @@ void ClientThread::DoCleanup()
 
 int ClientThread::HandleClient()
 {
-    char msg[1001];
+    char msg[READ_SIZE];
     /* citirea mesajului */
-    bzero (msg, 1000);
+    bzero (msg, READ_SIZE);
 //    printf ("[client]Introduceti un nume: ");
 //    fflush (stdout);
     if(*pendingMessage == " ") {
                                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                                 return 0;
                                }
-    if (write (sock, (ClientThread::pendingMessage)->toStdString().c_str(), 1000) < 0) \
+    if (write (sock, (ClientThread::pendingMessage)->toStdString().c_str(), READ_SIZE) <= 0) \
         //changed sign
     {
-        perror ("[client]Eroare la write() spre server.\n");
+        qDebug()<<"Server closed"<<Qt::endl;
+        fflush(stdout);
         close(sock);
         emit finished();
         return errno;
@@ -109,7 +113,8 @@ int ClientThread::HandleClient()
     DoCleanup();
 
     QCoreApplication::processEvents();
-
+    if(ServerLive == 0)
+        emit finished();
     fflush(stdout);
 
     return 1;

@@ -31,6 +31,21 @@ public:
     QLabel* genres;
     QLabel* ratingText;
     QLabel* viewsNum;
+    QLabel* an;
+    QLabel* anLabel;
+    QLabel* ISBNLabel;
+    QLabel* genresLabel;
+    QLabel* authorLabel;
+    QLabel* bookNameLabel;
+    QLabel* ratingLabel;
+    QVBoxLayout* ratingLay;
+    QVBoxLayout* anLay          ;
+    QVBoxLayout* ISBNLay        ;
+    QVBoxLayout* genreLay       ;
+    QVBoxLayout* authorLay      ;
+    QVBoxLayout* bookNameLay    ;
+
+
     QImage image;
     QStandardItemModel* vm;
     QDataWidgetMapper* mapper;

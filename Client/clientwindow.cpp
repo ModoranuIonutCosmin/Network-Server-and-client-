@@ -43,12 +43,13 @@ ClientWindow::ClientWindow(QWidget *parent)
     connect(rs->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboardAndCleanUpRecommandations()));
     connect(pb->goBack, SIGNAL(clicked()), this, SLOT(GoToDashboard()));
 
+    connect(rs, SIGNAL(DoBookPage(Book)), this, SLOT(doPage(Book)));
     connect(du, SIGNAL(DoBookPage(Book)), this, SLOT(doPage(Book)));
     connect(du, SIGNAL(DoRecommandationsPage()), this, SLOT(ShowRecommandations()));
     connect(du->publish, SIGNAL(clicked()), this, SLOT(GoToPublishPage()));
     connect(worker, SIGNAL(loginFailed()), lf, SLOT(ShowHint()));
     connect(worker, SIGNAL(sendBooks(QVector<Book>)), du, SLOT(AppendBooks(QVector<Book>)));
-    connect(worker, SIGNAL(createBooks(QVector<Book>)), rs, SLOT(DoBooksList(QVector<Book>)));
+    connect(worker, SIGNAL(sendBooksRec(QVector<Book>)), rs, SLOT(DoBooksList(QVector<Book>)));
 
 }
 
@@ -88,12 +89,15 @@ void ClientWindow::ShowRecommandations()
 void ClientWindow::GoToLogin()
 {
     this->pageHolder->setCurrentWidget(lf);
+    this->du->DeleteAllItems();
+    this->lf->Empty();
+
 }
 
 void ClientWindow::GoToDashboardAndCleanUpRecommandations()
 {
     this->pageHolder->setCurrentWidget(du);
-
+    this->rs->DeleteAllItems();
 }
 
 void ClientWindow::GoToDashboardAndCleanUpBookInspect()

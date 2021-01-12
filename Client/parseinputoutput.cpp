@@ -3,6 +3,7 @@
 int ParseInputOutput::lastJob = 0;
 QVector<Book> ParseInputOutput::result = {};
 bool ParseInputOutput::LoginResult = false;
+QVector<Book> ParseInputOutput::recommandationResult={};
 
 std::map<QString, std::function<bool(QString, int)>>
                                  ParseInputOutput::functii
@@ -12,16 +13,20 @@ std::map<QString, std::function<bool(QString, int)>>
                                     {QString("@SEARCH"), ParseInputOutput::GetResults},
                                     {QString("@DOWNLOAD"), ParseInputOutput::DownloadFile},
                                     {QString("@UPLOAD"), ParseInputOutput::UploadFile},
-                                    {QString("@RATE"), ParseInputOutput::Rate}
+                                    {QString("@RATE"), ParseInputOutput::Rate},
+                                    {QString("@RECOMMEND"), ParseInputOutput::Recommend}
         };
 bool ParseInputOutput::GetResults(QString msg, int sd)
 {
-    char msgc[1000];
+    char msgc[READ_SIZE];
     lastJob = AQUIRE_JOB;
 
-    if (read (sd, msgc, 1000) < 0)
+    if (read (sd, msgc, READ_SIZE) <= 0)
     {
-        perror ("[client]Eroare la read() de la server.\n");
+        qDebug()<<"Server closed"<<Qt::endl;
+        fflush(stdout);
+        close(sd);
+        ClientThread::ServerLive = 0;
         return errno;
     }
 
@@ -35,12 +40,15 @@ bool ParseInputOutput::GetResults(QString msg, int sd)
 
 bool ParseInputOutput::Login(QString msg, int sd)
 {
-    char msgc[1000];
+    char msgc[READ_SIZE];
     lastJob = LOGIN_JOB;
 
-    if (read (sd, msgc, 1000) < 0)
+    if (read (sd, msgc, READ_SIZE) <= 0)
     {
-        perror ("[client]Eroare la read() de la server.\n");
+        qDebug()<<"Server closed"<<Qt::endl;
+        fflush(stdout);
+        close(sd);
+        ClientThread::ServerLive = 0;
         return errno;
     }
     if(strstr(msgc, "Authorized") == msgc)
@@ -59,15 +67,18 @@ bool ParseInputOutput::Rate(QString msg, int sd)
 {
     int rating=0;
     ParseInputOutput::lastJob = RATE_JOB;
-    char mesaj[1001];
-    memset(mesaj, 0, 1000);
+    char mesaj[READ_SIZE];
+    memset(mesaj, 0, READ_SIZE);
     QStringList args = msg.split(QRegExp("(\\ )"));
     if(args.length()<2) return false;
         // doar verificare
         int id_carte = args[1].toInt();
-        if (read (sd, mesaj, 1000) < 0)
+        if (read (sd, mesaj, READ_SIZE) <= 0)
         {
-            perror ("[client]Eroare la read() de la server.\n");
+            qDebug()<<"Server closed"<<Qt::endl;
+            fflush(stdout);
+            close(sd);
+            ClientThread::ServerLive = 0;
             return errno;
         }
         QString tmpMesage(mesaj);
@@ -106,6 +117,27 @@ bool ParseInputOutput::Parse(std::unique_ptr<QString>& pendingMsg, int sd)
     return 1;
 }
 
+bool ParseInputOutput::Recommend(QString msg, int sd)
+{
+    char msgc[READ_SIZE];
+    lastJob = RECOMMEND_JOB;
+
+    if (read (sd, msgc, READ_SIZE) <= 0)
+    {
+        qDebug()<<"Server closed"<<Qt::endl;
+        fflush(stdout);
+        close(sd);
+        ClientThread::ServerLive = 0;
+        return errno;
+    }
+
+    /* afisam mesajul primit */
+    fflush(stdout);
+    QString msgC(msgc);
+    result = (Book::ParseBookString(msgC));
+    return true;
+}
+
 bool ParseInputOutput::DownloadFile(QString msg, int sd)
 {
     int downloadSize = 0;
@@ -138,10 +170,13 @@ bool ParseInputOutput::DownloadFile(QString msg, int sd)
         }
         unsigned char pachet[1501];
 
-        if ((received = read (sd, pachet, sizeof(unsigned char)*std::min(downloadSize, 1499))) < 0)
+        if ((received = read (sd, pachet, sizeof(unsigned char)*std::min(downloadSize, 1499))) <= 0)
         {
-                perror ("[client]Eroare la read() de la server.\n");
-                return errno;
+            qDebug()<<"Server closed"<<Qt::endl;
+            fflush(stdout);
+            close(sd);
+            ClientThread::ServerLive = 0;
+            return errno;
         }
 
         downloadSize-= received;

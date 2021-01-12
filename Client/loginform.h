@@ -18,11 +18,12 @@ class LoginForm : public QWidget
     Q_OBJECT
 public:
     explicit LoginForm(QWidget *parent = nullptr);
-
+    void Empty();
 signals:
 private slots:
     void ShowHint();
     void AttemptLogin();
+
 
 public:
     QStandardItemModel* vm=nullptr;

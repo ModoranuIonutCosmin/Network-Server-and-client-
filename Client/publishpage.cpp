@@ -15,13 +15,14 @@ PublishPage::PublishPage(QWidget *parent) : QWidget(parent)
 
 
 
+    const QVector<QString> nume = {"Autor:", "ISBN:", "Gen:", "Titlu:", "An:", "Path:"};
+     AuthorLabel = new QLabel(nume[0].leftJustified(30), this)   ;
+     ISBNLabel   = new QLabel(nume[1].leftJustified(30), this)   ;
+     genLabel    = new QLabel(nume[2].leftJustified(30), this)   ;
+     titleLabel  = new QLabel(nume[3].leftJustified(32), this)   ;
+     anLabel     = new QLabel(nume[4].leftJustified(31), this)   ;
+     pathLabel =   new QLabel(nume[5].leftJustified(30), this);
 
-     AuthorLabel = new QLabel("Autor:", this)   ;
-     ISBNLabel   = new QLabel("ISBN :", this)   ;
-     genLabel    = new QLabel("Gen  :", this)   ;
-     titleLabel  = new QLabel("Titlu:", this)   ;
-     anLabel     = new QLabel("An   :", this)   ;
-     pathLabel =   new QLabel("Path :", this);
      errorMsg = new QLabel("", this);
 
      authorPair = new QHBoxLayout   ();
@@ -31,14 +32,16 @@ PublishPage::PublishPage(QWidget *parent) : QWidget(parent)
      genPair = new QHBoxLayout      ();
      titlePair = new QHBoxLayout    ();
      proceedLayout = new QHBoxLayout();
-     goBackLayout = new QHBoxLayout;
+     goBackLayout = new QHBoxLayout();
 
 
      titlePair->addWidget(titleLabel);
      titlePair->addWidget(title);
 
+
      authorPair->addWidget(AuthorLabel);
      authorPair->addWidget(author);
+
 
      ISBNPair->addWidget(ISBNLabel);
      ISBNPair->addWidget(ISBN);
@@ -53,24 +56,28 @@ PublishPage::PublishPage(QWidget *parent) : QWidget(parent)
      genPair->addWidget(genLabel);
      genPair->addWidget(gen);
 
-     proceedLayout->addStretch(1);
      proceedLayout->addWidget(proceed);
-     proceedLayout->addStretch(1);
 
-     goBackLayout->addStretch(1);
      goBackLayout->addWidget(goBack);
-     goBackLayout->addStretch(1);
 
      mainLayout = new QVBoxLayout(this);
      mainLayout->addLayout(titlePair);
+     mainLayout->addStretch(1);
      mainLayout->addLayout(authorPair);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(genPair);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(anPair);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(ISBNPair);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(pathPair);
 //     mainLayout->addStretch(1);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(proceedLayout);
+      mainLayout->addStretch(1);
      mainLayout->addLayout(goBackLayout);
+      mainLayout->addStretch(1);
      mainLayout->addWidget(errorMsg);
 //     mainLayout->addStretch(1);
 
