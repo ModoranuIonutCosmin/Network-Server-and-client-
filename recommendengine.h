@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVector>
 #include <cmath>
+#include <algorithm>
 #include "sqlcontroller.h"
 #include "rbook.h"
 #include "rrating.h"
@@ -16,8 +17,10 @@ class RecommendEngine
 public:
     template<typename T>
     static void RemoveV2fromV1(QVector<T>& v1, QVector<T>v2);
-    static void FilterRatingsByUser(QVector<RRating>& car, QVector<RBook> ac);
+    static void FilterRatingsByBooks(QVector<RRating>& car, QVector<RBook> ac);
+    static QVector<RRating> FilterRatingsByUser (QVector<RRating> car, int id_user);
     static void SortMapBySize(std::map<int, QVector<RBook>>& mapa);
+    QVector<RRating> GetUserRating(QVector<RBook>, int);
     static QVector<RBook> In(QVector<RBook>src, QVector<RBook>dst);
     RecommendEngine(int);
     void CollectDataInitial(int);

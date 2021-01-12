@@ -8,7 +8,7 @@
 #include <iostream>
 #include <QThread>
 #include <QCoreApplication>
-
+#define READ_SIZE 12000
 ClientHandlingThread::ClientHandlingThread(QObject *parent) : QObject(parent)
 {
     timer = new QTimer(this);
@@ -34,14 +34,14 @@ int ClientHandlingThread::HandleClient()
     long addr = 0;
 
     addr = (long)((struct sockaddr_in *)&addr)->sin_addr.s_addr;
-    buffer = (char *)malloc((1001)*sizeof(char));
+    buffer = (char *)malloc((READ_SIZE)*sizeof(char));
     buffer[len] = 0;
     bzero(buffer, 1000);
 
     /* read message */
     std::cout<<"Ajung aici cu len = "<<len;
     fflush(stdout);
-    if(read(cd, buffer, 1000) > 0)
+    if(read(cd, buffer, READ_SIZE) > 0)
     {
         std::cout<<buffer<<std::endl;
         NetCODE::ParseMessage(QString(buffer), cd);
@@ -67,6 +67,7 @@ int ClientHandlingThread::HandleClient()
 int ClientHandlingThread::CleanUP()
 {
     timer->stop();
+    close(this->cd);
     return 1;
 
 }

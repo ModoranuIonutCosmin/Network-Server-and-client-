@@ -18,6 +18,7 @@
 #include <future>
 #include <iostream>
 #include <QThread>
+#include <QMutex>
 #include <QAbstractEventDispatcher>
 #include "clienthandlingthread.h"
 #include <QCoreApplication>
@@ -27,18 +28,23 @@ class NetworkServer : public QObject
 public:
     explicit NetworkServer(QObject *parent = nullptr);
     static void CloseDown(int);
-
+    static std::unique_ptr<QString> instructiune;
+    static QMutex instructionProtect;
 signals:
     void finished();
+    void closeAll();
     void OnMessageReceived(QString text);
 
 private slots:
     int StartServer();
     int RelayText(QString text);
     int ListenCon();
+    int CloseDown();
 private:
     QTimer* timer;
+
     static int sock;
+
 };
 
 #endif // NETWORKSERVER_H

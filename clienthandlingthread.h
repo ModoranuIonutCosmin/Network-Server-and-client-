@@ -21,7 +21,6 @@ class ClientHandlingThread : public QObject
 public:
     explicit ClientHandlingThread(QObject *parent = nullptr);
     explicit ClientHandlingThread(int sd, int cd, struct sockaddr addr);
-
 signals:
 
     void NotifyUI(QString text);

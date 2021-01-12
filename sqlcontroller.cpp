@@ -10,6 +10,10 @@ SQLController::SQLController()
 
 int SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<QString> values)
 {
+    for(int i=0;i< values.size(); i++)
+    {
+        SanitizeInputs(values[i]);
+    }
     if(Initialized == false)
         Initialize();
     QString querryText = "SELECT * FROM " + EnumHelpers::QtEnumToString(table) +" WHERE (";
@@ -17,6 +21,11 @@ int SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<Q
     {
         qDebug()<<"Bad stuff happening in SQL exists records";
         return 0;
+    }
+    for(int i=0; i< fields.length();i++)
+        if(fields[i] == "authHash")
+    {
+        values[i] = QString(QCryptographicHash::hash(values[i].toStdString().c_str(), QCryptographicHash::Sha256).toHex());
     }
     for(int i=0; i<fields.length(); i++)
     {
@@ -38,6 +47,10 @@ int SQLController::ExistsRecord(DBTabs table, QVector<QString> fields, QVector<Q
 
 QVector<Book> SQLController::GetBooksList(QVector<QString> constraints)
 {
+    for(int i=0;i< constraints.size(); i++)
+    {
+        SanitizeInputs(constraints[i]);
+    }
     QVector<Book> books;
     const QVector<QString> fields = {"Titlu", "Autor", "Gen", "ISBN", "rating", "an"};
     if(SQLController::Initialized == false)
@@ -78,6 +91,38 @@ QVector<Book> SQLController::GetBooksList(QVector<QString> constraints)
     return books;
 }
 
+QVector<Book> SQLController::Aggregate(QVector<RBook> rBooks)
+{
+    if(Initialized == false)
+        Initialize();
+    QVector<Book> books;
+    QString querry = "SELECT Titlu,Autor,Gen,ISBN,rating, an,id_carte FROM BOOKS WHERE ID_CARTE IN (";
+    for(auto& rBook : rBooks)
+    {
+        querry+= QString::number(rBook.id_carte)+",";
+    }
+    querry[querry.length()-1] = ')';
+    QSqlQuery qry(db);
+    qry.exec(querry);
+    while(qry.next())
+    {
+        //aici e an dupa rating, invers
+        QString titlu = qry.value(0).toString();
+        QString autor = qry.value(1).toString();
+        QString gen = qry.value(2).toString();
+        QString isbn = qry.value(3).toString();
+        int an = qry.value(5).toString().toInt();
+        QString rating = qry.value(4).toString();
+        int id_carte = qry.value(6).toInt();
+        QVector<QString> genuri{gen};
+        Book carte(titlu,autor,genuri,isbn, rating, an);
+        carte.id_carte = id_carte;
+        books.append(carte);
+    }
+    return books;
+
+}
+
 QString SQLController::GetFilePath(int id_carte)
 {
     if(Initialized == false)
@@ -95,6 +140,13 @@ QString SQLController::GetFilePath(int id_carte)
 int SQLController::RegisterBook(Book &b)
 {
     int newID = -1;
+    //Sanitaze params
+    SanitizeInputs(b.ISBN);
+    SanitizeInputs(b.author);
+    SanitizeInputs(b.genre[0]);
+    SanitizeInputs(b.rating);
+    SanitizeInputs(b.title);
+
     if(Initialized == false)
         Initialize();
     QString querry = QString("INSERT INTO BOOKS (Titlu, Autor, Gen, ISBN, An, rating) ")+
@@ -108,7 +160,7 @@ int SQLController::RegisterBook(Book &b)
         qDebug()<<"Eroare la MAX() in register book"<<Qt::endl;
     }
     newID = qry.value(0).toInt();
-    qry.exec("insert into STORAGE VALUES ("+QString::number(newID)+",'"+b.title.replace(" ","_")+ QString::number(newID)+".pdf')");
+    qry.exec("insert into STORAGE VALUES ("+QString::number(newID)+",'"+b.title.replace(" ","_")+QString::number(newID)+ ".pdf')"); //
     for(auto& gen : b.genre)
     {
         qry.exec("insert into GENRES values (" + QString::number(newID) +",'" +gen +"')");
@@ -196,7 +248,7 @@ QVector<RBook> SQLController::GetUsersRatedBooks(int id_user)
         Initialize();
     QVector<RBook> ret;
 
-    QString querry = "SELECT TITLU, AUTOR,ID_CARTE,RATING FROM BOOKS NATURAL JOIN RATING WHERE ID_USER="+QString::number(id_user);
+    QString querry = "SELECT TITLU, AUTOR,b.ID_CARTE,b.RATING FROM BOOKS b JOIN RATING r ON b.id_carte = r.id_carte WHERE ID_USER="+QString::number(id_user);
     QSqlQuery qry(db);
     qry.exec(querry);
     while(qry.next())
@@ -251,6 +303,23 @@ QVector<RRating> SQLController::GetRatingValues()
     return ret;
 }
 
+void SQLController::InsertDownloadActivity(int id_carte, int id_user)
+{
+    if(Initialized == false)
+        Initialize();
+    QSqlQuery qry(db);
+    QString querry = "INSERT INTO ACTIVITY (id_carte, id_user, tip, data) VALUES("+
+            QString::number(id_carte)+","+QString::number(id_user)+",'DOWNLOAD', date('now'))";
+    qry.exec(querry);
+}
+
+void SQLController::SanitizeInputs(QString& param)
+{
+    param = param.replace('\'', ' ');
+    param = param.replace('"', ' ');
+
+}
+
 void SQLController::Initialize()
 {
     QString absolutePath = QDir::currentPath() + ("/userdata.sql");
@@ -274,6 +343,33 @@ void SQLController::Initialize()
 
                qDebug()<<"Stuff went wrong"<<Qt::endl;
         }
+    }
+
+}
+
+void SQLController::DoStuff()
+{
+    if(Initialized == false)
+        Initialize();
+    std::ifstream f("inputfile.txt");
+    QSqlQuery qry(db);
+
+
+    std::string line, a ,b, c;
+    while(std::getline(f, line))
+    {
+        Book b;
+
+        QString line1(line.c_str());
+        QVector<QString> vec = line1.split("\t").toVector();
+        b.title = vec[0];
+        b.genre.push_back(vec[2].replace('_', ' '));
+        b.author=vec[1];
+        b.an = 2020;
+//        b.rating = "0";
+        b.ISBN = "1-2-3-4324-12";
+        RegisterBook(b);
+
     }
 
 }

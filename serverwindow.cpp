@@ -3,8 +3,7 @@
 #include "QTextEdit"
 #include <iostream>
 #include <QThread>
-#include <QPushButton>
-#include <QVBoxLayout>
+
 #include "networkserver.h"
 #include "stringhelpers.h"
 ServerWindow::ServerWindow(QWidget *parent)
@@ -13,21 +12,35 @@ ServerWindow::ServerWindow(QWidget *parent)
 {
 
     ui->setupUi(this);
-    QPushButton* proceed = new QPushButton("Recommend");
-   QVBoxLayout* mainLayout   = new QVBoxLayout();
-    proceed->setLayout(mainLayout);
-    setCentralWidget(proceed);
-    connect(proceed, SIGNAL(clicked()), this, SLOT(recommend()));
+    logOutput = new QTextEdit("Server initialized");
+     shutdown = new QPushButton("Shutdown");
+     logLastMsg = new QPushButton("Log last messages");
+
+
+    QVBoxLayout* mainLayout   = new QVBoxLayout();
+    mainLayout->addWidget(logOutput);
+    mainLayout->addWidget(shutdown);
+    mainLayout->addWidget(logLastMsg);
+
+
+    QWidget *window = new QWidget();
+             window->setLayout(mainLayout);
+//    proceed->setLayout(mainLayout);
+    setCentralWidget(window);
+//    SQLController::DoStuff();
+
     QThread* thread = new QThread;
     NetworkServer* worker = new NetworkServer();
     worker->moveToThread(thread);
-
+    connect(shutdown, SIGNAL(clicked()), this, SLOT(CloseServer()));
     connect(worker, SIGNAL(OnMessageReceived(QString)), this, SLOT(UpdateUiText(QString)));
     connect(thread, SIGNAL(started()), worker, SLOT(StartServer()), Qt::QueuedConnection);
     connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
     thread->start();
+
 }
 
 ServerWindow::~ServerWindow()
@@ -42,9 +55,10 @@ void ServerWindow::UpdateUiText(QString text)
     fflush(stdout);
 }
 
-void ServerWindow::recommend()
+void ServerWindow::CloseServer()
 {
-    RecommendEngine re(1);
-    re.GetRecommandations();
+    NetworkServer::instructionProtect.lock();
+    *(NetworkServer::instructiune) = "SHUTDOWN";
+    NetworkServer::instructionProtect.unlock();
 }
 

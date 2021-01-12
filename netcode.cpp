@@ -7,7 +7,8 @@ std::map<QString, std::function<bool(QString, int)>>
                                     {QString("@SEARCH"), NetCODE::Search},
                                     {QString("@DOWNLOAD"), NetCODE::Download},
                                     {QString("@UPLOAD"), NetCODE::Upload},
-                                    {QString("@RATE"), NetCODE::Rate}
+                                    {QString("@RATE"), NetCODE::Rate},
+                                    {QString("@RECOMMEND"), NetCODE::Recommend}
                                 };
 QMutex NetCODE::connectionsCS;
 NetCODE* NetCODE::instanta = nullptr;
@@ -45,12 +46,12 @@ bool NetCODE::Login(QString args, int clientSD)
     {
         qDebug()<<"Access granted for client with cd="<<clientSD;
         updateConnectionData(clientSD, values[0], userID);
-        write(clientSD, "Authorized", 1000);
+        write(clientSD, "Authorized", READ_SIZE);
         return 1;
     }
     else
     {
-        write(clientSD, "LOGFAIL", 1000);
+        write(clientSD, "LOGFAIL", READ_SIZE);
     }
     return 0;
 }
@@ -62,7 +63,7 @@ bool NetCODE::Search(QString args, int cd)
     auto books = SQLController::GetBooksList(fields.toVector());
     QString sendString= Book::DoListAsMessage(books);
     qDebug()<<sendString<<Qt::endl;
-    write(cd, sendString.toStdString().c_str(), 1000);
+    write(cd, sendString.toStdString().c_str(), READ_SIZE);
     return 1;
 
 }
@@ -71,10 +72,10 @@ bool NetCODE::Download(QString msg, int cd)
 {
 
     int id_carte=msg.toInt(); //tbc on expansion!
-    QString fileName ="storage/" + SQLController::GetFilePath(id_carte);
+    QString fileName =QDir::currentPath()+"/storage/" + SQLController::GetFilePath(id_carte);
 
     std::ifstream f(fileName.toStdString(), std::ios::in|std::ios::binary);
-
+    int deschis = f.is_open();
     int download_size = TransfersController::GetFileSize(fileName);
     unsigned char* fileContent;
     try
@@ -102,6 +103,8 @@ bool NetCODE::Download(QString msg, int cd)
     }
 
     delete[] fileContent;
+
+    SQLController::InsertDownloadActivity(id_carte,GetIDFromCD(cd));
     return 1;
 }
 
@@ -153,6 +156,18 @@ bool NetCODE::Upload(QString args, int cd)
 
     delete[] fileBuffer;
     return 1;
+}
+
+bool NetCODE::Recommend(QString args, int cd)
+{
+    QRegExp rx("(\\|)");
+    QStringList fields = args.split(rx);
+    RecommendEngine re(NetCODE::GetIDFromCD(cd));
+    auto Rbooks = re.GetRecommandations();
+    auto books = SQLController::Aggregate(Rbooks);
+    QString sendString= Book::DoListAsMessage(books);
+    qDebug()<<sendString<<Qt::endl;
+    write(cd, sendString.toStdString().c_str(), READ_SIZE);
 }
 
 bool NetCODE::Rate(QString arg, int cd)

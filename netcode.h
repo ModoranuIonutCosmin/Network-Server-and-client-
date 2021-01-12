@@ -19,7 +19,8 @@
 #include <fstream>
 #include <QPair>
 #include "transferscontroller.h"
-
+#include "recommendengine.h"
+#define READ_SIZE 12000
 class NetCODE
 {
 public:
@@ -32,6 +33,7 @@ public:
     static bool Search(QString, int);
     static bool Download(QString, int);
     static bool Upload(QString, int);
+    static bool Recommend(QString, int);
     static bool Rate(QString, int);
     static bool addConnection(Connection con);
     static int GetIDFromCD(int cd);

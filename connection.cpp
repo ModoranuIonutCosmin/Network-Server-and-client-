@@ -21,7 +21,7 @@ Connection::Connection(const Connection &other)
     this->cd = other.cd;
     this->email = other.email;
     this->length = other.length;
-    this->role = other.role;
+
 }
 
 void Connection::operator=(const Connection &other)
@@ -32,7 +32,6 @@ void Connection::operator=(const Connection &other)
     this->cd = other.cd;
     this->email = other.email;
     this->length = other.length;
-    this->role = other.role;
 }
 
 

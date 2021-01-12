@@ -12,12 +12,11 @@ public:
     Connection(const Connection& other);
     void operator=(const Connection& other);
     static int IDCurrent; //porneste cu 0 si scade cand pleaca un client
-    QString email;
+    QString email="";
     int ID;
     socklen_t length;
     sockaddr adresaIP;
     int cd;
-    int role;
 };
 
 #endif // CONNECTION_H

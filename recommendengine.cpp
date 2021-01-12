@@ -9,7 +9,7 @@
 //R ENGINE
 
 
-void RecommendEngine::FilterRatingsByUser(QVector<RRating> &car, QVector<RBook> ac)
+void RecommendEngine::FilterRatingsByBooks(QVector<RRating> &car, QVector<RBook> ac)
 {
     QVector<RRating> result;
     result.reserve(300);
@@ -25,6 +25,20 @@ void RecommendEngine::FilterRatingsByUser(QVector<RRating> &car, QVector<RBook> 
         }
     }
     car = result;
+}
+
+QVector<RRating> RecommendEngine::FilterRatingsByUser(QVector<RRating> car, int id_user)
+{
+    QVector<RRating> ret;
+    for(int i=0; i< car.size(); i++)
+    {
+        if(car[i].id_user == id_user)
+        {
+            ret.push_back(car[i]);
+            break;
+        }
+    }
+    return ret;
 }
 
 void RecommendEngine::SortMapBySize(std::map<int, QVector<RBook> > &mapa)
@@ -49,6 +63,23 @@ void RecommendEngine::SortMapBySize(std::map<int, QVector<RBook> > &mapa)
         ret[marime.second] = v;
     }
     mapa = ret;
+}
+
+QVector<RRating> RecommendEngine::GetUserRating(QVector<RBook> books, int id_user)
+{
+    QVector<RRating>  ret;
+    for(int i=0; i< ratingDataAll.size();i++)
+    {
+        for(int j=0; j<books.size(); j++)
+        {
+            if(ratingDataAll[i].id_carte == books[j].id_carte && ratingDataAll[i].id_user == id_user)
+            {
+                ret.push_back(ratingDataAll[i]);
+                break;
+            }
+        }
+    }
+    return ret;
 }
 
 QVector<RBook> RecommendEngine::In(QVector<RBook> src, QVector<RBook> dst)
@@ -99,7 +130,7 @@ void RecommendEngine::CollectDataInitial(int id_user)
 
     ratingDataAll = ratingData;
 
-    FilterRatingsByUser(ratingData, bookData); // limiteaza domeniul la cartile citite de user-ul
+    FilterRatingsByBooks(ratingData, bookData); // limiteaza domeniul la cartile citite de user-ul
                                             // care cere recomandarile
     for (const auto& grup : ratingData)
     {
@@ -116,46 +147,82 @@ void RecommendEngine::CollectDataInitial(int id_user)
 QVector<RBook> RecommendEngine::GetRecommandations()
 {
     double pCoefficient;
+    QVector<RRating> userRATINGS = userRatings;
+
     for(auto& grup : usersClusters)
     {
-        int nrRatings = grup.second.size();
+        userRATINGS = userRatings;
         QVector<RBook> temp = this->In(grup.second, bookData);
-        QVector<double> rating_input;
-        QVector<double> rating_user;
+
+        QVector<RRating> temp1 = GetUserRating(temp, grup.first); //for user
+        FilterRatingsByBooks(userRATINGS, temp); //for inputs
+        QVector<RRating> temp2 = userRATINGS;
+
+        std::vector<double> rating_input;
+        std::vector<double> rating_user;
+
         double sum_input=0;
         double sum_user=0;
         double sum_input_p=0;
         double sum_user_p=0;
         double sum_mixed_p=0;
-        for(int ii =0; ii<temp.size(); ii++)
+        for(int ii =0; ii<temp2.size(); ii++)
         {
-            rating_input.append(temp[ii].rating);
-            rating_user.append(grup.second[ii].rating);
-            sum_input+= temp[ii].rating;
-            sum_user+= grup.second[ii].rating;
-            sum_input_p+= temp[ii].rating*temp[ii].rating;
-            sum_user_p+=grup.second[ii].rating*grup.second[ii].rating;
-            sum_mixed_p+= grup.second[ii].rating*temp[ii].rating;
+            rating_input.push_back(temp2[ii].rating);
+            rating_user.push_back(temp1[ii].rating);
+//            sum_input+= temp2[ii].rating;
+//            sum_user+= temp1[ii].rating;
+//            sum_input_p+= temp2[ii].rating*temp2[ii].rating;
+//            sum_user_p+=temp1[ii].rating*temp1[ii].rating;
+//            sum_mixed_p+= temp2[ii].rating*temp1[ii].rating;
         }
-        double sx=0,sy=0,sxy=0;
-        sx =sum_input_p - pow(sum_input_p,2)/(double)nrRatings;
-        sy = sum_user_p - pow(sum_user_p, 2)/(double)nrRatings;
-        sxy= sum_mixed_p - (sum_input_p*sum_user_p)/(double)nrRatings;
+        int nrRatings = rating_input.size();
+        if(nrRatings == 0) continue;
+        double avg_input, avg_user;
+        avg_input = std::accumulate(rating_input.begin(), rating_input.end(), 0) /(double)nrRatings;
+        avg_user = std::accumulate(rating_user.begin(), rating_user.end(), 0)/(double)nrRatings;
+         double sx=0,sy=0,sxy=0;
+        for(int i=0; i<nrRatings; i++)
+        {
+            sxy += (temp1[i].rating - avg_user)*(temp2[i].rating - avg_input);
+            sx += pow(temp1[i].rating - avg_user, 2);
+            sy += pow(temp2[i].rating - avg_input, 2);
+        }
+
+
+//        sx =sum_input_p - pow(sum_input_p,2)/(double)nrRatings;
+//        sy = sum_user_p - pow(sum_user_p, 2)/(double)nrRatings;
+//        sxy= sum_mixed_p - (sum_input_p*sum_user_p)/(double)nrRatings;
         if(sx!=0 and sy!=0)
-            pCoefficient = sxy/((double)sqrt(sx*sy));
+            pCoefficient = sxy/(double)sqrt(sx*sy);
         else
             pCoefficient=0;
         indicatoriPearson[grup.first]= pCoefficient;
     }
-    for(auto& rating : ratingDataAll)
+    for(auto& user : usersClusters)
     {
-        auto b = this->GetBookGlobal(rating.id_carte);
-        b.Pondere += (double)indicatoriPearson[rating.id_user];
-        b.SI += indicatoriPearson[rating.id_user]*(double)rating.rating;
+        QVector<RRating> tmp = ratingDataAll;
+        QVector<RBook> complement = allBooks;
+        this->RemoveV2fromV1(complement, bookData);
+        this->FilterRatingsByBooks(tmp, complement);
+        for(auto& rating : tmp)
+        {
+            auto& b = this->GetBookGlobal(rating.id_carte);
+            b.Pondere += (double)indicatoriPearson[rating.id_user];
+            b.SI += indicatoriPearson[rating.id_user]*(double)rating.rating;
+        }
     }
     for(auto& book: allBooks)
     {
-        book.scor =(double) book.SI / book.Pondere;
+        if(book.SI!=0 and book.Pondere!=0)
+        {
+            book.scor =(double) book.SI / book.Pondere;
+        }
+        else
+        {
+            book.scor=0;
+        }
+
     }
     std::sort(allBooks.begin(), allBooks.end(), [](RBook&a, RBook&b)
     {

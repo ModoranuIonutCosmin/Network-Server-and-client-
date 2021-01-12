@@ -2,6 +2,9 @@
 #define SERVERWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QTextEdit>
 #include "sqlcontroller.h"
 #include "recommendengine.h"
 QT_BEGIN_NAMESPACE
@@ -16,9 +19,12 @@ public:
     ServerWindow(QWidget *parent = nullptr);
     int ManageNetCode();
     ~ServerWindow();
+    QPushButton* shutdown  = nullptr;
+    QPushButton* logLastMsg= nullptr;
+    QTextEdit* logOutput  = nullptr;
 private slots:
     void UpdateUiText(QString text);
-    void recommend();
+    void CloseServer();
 private:
     Ui::ServerWindow *ui;
 };
